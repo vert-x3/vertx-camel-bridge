@@ -1,4 +1,4 @@
-= Vert.x Camel Bridge
+# Vert.x Camel Bridge
 
 This component lets Vert.x application to interact with Camel endpoints:
 
