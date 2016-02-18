@@ -51,7 +51,7 @@ public class CamelBridgeImpl implements CamelBridge {
 
     for (InboundMapping inbound : options.getInboundMappings()) {
       // camel -> vert.x
-      createInbountBridge(vertx, inbound);
+      createInboundBridge(vertx, inbound);
     }
 
     for (OutboundMapping outbound : options.getOutboundMappings()) {
@@ -74,14 +74,14 @@ public class CamelBridgeImpl implements CamelBridge {
           in.setHeaders(MultiMapHelper.toMap(message.headers()));
         }
         if (message.replyAddress() != null) {
+          // If we have a reply address, switch to InOut and expect register a synchronization instance to retrieve
+          // the Camel reply.
           exchange.setPattern(ExchangePattern.InOut);
           exchange.addOnCompletion(new Synchronization() {
             @Override
             public void onComplete(Exchange exchange) {
               Object body = exchange.getIn().getBody();
-              DeliveryOptions delivery = new DeliveryOptions();
-              exchange.getIn().getHeaders().entrySet().stream().forEach(entry ->
-                  delivery.addHeader(entry.getKey(), entry.getValue().toString()));
+              DeliveryOptions delivery = getDeliveryOptions(exchange.getIn(), true);
               message.reply(body, delivery);
             }
 
@@ -95,7 +95,7 @@ public class CamelBridgeImpl implements CamelBridge {
     }));
   }
 
-  private void createInbountBridge(Vertx vertx, InboundMapping inbound) {
+  private void createInboundBridge(Vertx vertx, InboundMapping inbound) {
     Endpoint endpoint = validate(inbound);
 
     try {
@@ -106,15 +106,10 @@ public class CamelBridgeImpl implements CamelBridge {
           // If the exchange has the InOut pattern, we add a reply handler.
           endpoint.createConsumer(exchange -> {
 
-
             Message in = exchange.getIn();
 
             Object body = convert(inbound, in);
-            DeliveryOptions delivery = new DeliveryOptions();
-            if (inbound.isHeadersCopy() && in.hasHeaders()) {
-              in.getHeaders().entrySet().stream().forEach(entry ->
-                  delivery.addHeader(entry.getKey(), entry.getValue().toString()));
-            }
+            DeliveryOptions delivery = getDeliveryOptions(in, inbound.isHeadersCopy());
 
             if (inbound.isPublish()) {
               vertx.eventBus().publish(inbound.getAddress(), body.toString(), delivery);
@@ -139,6 +134,15 @@ public class CamelBridgeImpl implements CamelBridge {
     } catch (Exception e) {
       throw new IllegalStateException("The endpoint " + inbound.getUri() + " does not support consumers");
     }
+  }
+
+  private DeliveryOptions getDeliveryOptions(Message msg, boolean headerCopy) {
+    DeliveryOptions delivery = new DeliveryOptions();
+    if (headerCopy && msg.hasHeaders()) {
+      msg.getHeaders().entrySet().stream().forEach(entry ->
+          delivery.addHeader(entry.getKey(), entry.getValue().toString()));
+    }
+    return delivery;
   }
 
   private Object convert(InboundMapping inbound, Message msg) {

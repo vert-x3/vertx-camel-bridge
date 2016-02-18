@@ -47,7 +47,7 @@ public interface CamelBridge {
   /**
    * Stops the bridge
    *
-   * @return the current {@link CamelBridges}
+   * @return the current {@link CamelBridge}
    */
   CamelBridge stop();
 
