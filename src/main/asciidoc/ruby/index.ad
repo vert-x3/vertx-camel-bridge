@@ -1,0 +1,108 @@
+= Vert.x Camel Bridge
+:toc: left
+
+Apache Camel (http://camel.apache.org) is an open source Java framework that focuses on making integration easier
+and more accessible to developers.
+
+This bridge lets Vert.x applications interact with Camel endpoints:
+
+* the application can send messages to Camel.
+* the application can receive message from Camel.
+
+The bridge relies on the Vert.x event bus and associate an event bus address to a Camel endpoint.
+
+== Using vertx-camel-bridge
+
+To use the Vert.x Camel Bridge, add the following dependency to the _dependencies_ section of your
+build descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-camel-bridge</artifactId>
+  <version>3.3.0-SNAPSHOT</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-camel-bridge:3.3.0-SNAPSHOT'
+----
+
+== Bridge configuration
+
+Before being used, the bridge needs to be configured and started:
+
+[source,ruby]
+----
+camel = Java::OrgApacheCamelImpl::DefaultCamelContext.new()
+Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_uri("direct:stuff").set_address("eventbus-address")).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("eventbus-address").set_uri("stream:out"))).start()
+
+----
+
+The bridge requires a `CamelContext`. It will find the endpoint from the context.
+
+=== Inbound mapping
+
+Inbound mapping associates a Camel endpoint to an event bus address. Messages received on this endpoint are
+transformed to event bus messages.
+
+[source,ruby]
+----
+endpoint = camel.get_endpoint("direct:foo")
+
+Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_uri("direct:stuff").set_address("eventbus-address")).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_endpoint(endpoint).set_address("eventbus-address")).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_endpoint(endpoint).set_address("eventbus-address").set_headers_copy(false)).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_endpoint(endpoint).set_address("eventbus-address").set_publish(true)).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_endpoint(endpoint).set_address("eventbus-address").set_body_type(Java::JavaLang::String::class)))
+
+----
+
+The snippet above shows different ways to configure an inbound mapping:
+
+* you can configure the Camel endpoint either using the `Endpoint` object or its uri
+* you can disables the header copy (Camel message headers are copied to the event bus message)
+* you can uses `publish` instead of `send` to broadcast the message to all event bus consumers
+* you can configures the type of the event bus message body. If not set it uses the Camel message payload. If
+sets, it looks in the Camel context for a converter between the Camel message payload and the desired type.
+
+_Note_: `org.fusesource.hawtbuf.Buffer` are automatically converted to `link:../../yardoc/Vertx/Buffer.html[Buffer]`.
+
+=== Outbound mapping
+
+Outbound mapping associates an event bus address to a Camel endpoint. Messages received on this event bus address
+are transformed to Camel messages and sent to the endpoint.
+
+[source,ruby]
+----
+endpoint = camel.get_endpoint("stream:out")
+
+Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("eventbus-address").set_uri("stream:out")).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("eventbus-address").set_endpoint(endpoint)).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("eventbus-address").set_endpoint(endpoint).set_headers_copy(false)).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("eventbus-address").set_endpoint(endpoint)))
+
+----
+
+The snippet above shows different ways to configure an outbound mapping.
+
+You can connect your outbound mapping to a Camel route:
+
+[source,ruby]
+----
+camel.add_routes(Java::OrgApacheCamelBuilder::RouteBuilder.new())
+
+bridge = Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("test").set_uri("direct:start")))
+
+camel.start()
+bridge.start()
+
+
+vertx.event_bus().send("test", "hello") { |reply_err,reply|
+  # Reply from the route (here it will be "OK"
+}
+
+----
+
+== Stopping the bridge
+
+Don't forget to stop the bridge using the `stop` method.
