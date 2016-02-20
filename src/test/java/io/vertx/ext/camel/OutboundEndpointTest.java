@@ -24,6 +24,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
+import org.apache.camel.Expression;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
@@ -35,10 +36,14 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.to;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Tests that event bus messages are propagated to Camel
@@ -292,6 +297,64 @@ public class OutboundEndpointTest {
       context.assertEquals("OK", reply.result().body());
       async.complete();
     });
+  }
+
+  @Test
+  public void testWithRoute() throws Exception {
+    AtomicBoolean calledSpy = new AtomicBoolean();
+    AtomicBoolean startedSpy = new AtomicBoolean();
+    vertx.createHttpServer().requestHandler(request -> {
+      calledSpy.set(true);
+      request.response().end("Alright");
+    }).listen(8080, ar -> {
+      startedSpy.set(ar.succeeded());
+    });
+
+    await().atMost(DEFAULT_TIMEOUT).untilAtomic(startedSpy, is(true));
+
+    camel.addRoutes(new RouteBuilder() {
+      @Override
+      public void configure() throws Exception {
+        from("direct:my-route")
+            .to("seda:next")
+            .to("http://localhost:8080");
+      }
+    });
+
+    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+        .addOutboundMapping(new OutboundMapping().setAddress("camel-route").setUri("direct:my-route")));
+
+    camel.start();
+    bridge.start();
+
+    vertx.eventBus().send("camel-route", "hello");
+
+    await().atMost(DEFAULT_TIMEOUT).untilAtomic(calledSpy, is(true));
+  }
+
+  @Test
+  public void testWithRouteWithFailure() throws Exception {
+    AtomicReference<String> calledSpy = new AtomicReference<>();
+
+    camel.addRoutes(new RouteBuilder() {
+      @Override
+      public void configure() throws Exception {
+        from("direct:my-route")
+            .to("http://localhost:8080");
+      }
+    });
+
+    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+        .addOutboundMapping(new OutboundMapping().setAddress("camel-route").setUri("direct:my-route")));
+
+    camel.start();
+    bridge.start();
+
+    vertx.eventBus().send("camel-route", "hello", reply -> {
+      calledSpy.set(reply.cause().getMessage());
+    });
+
+    await().atMost(DEFAULT_TIMEOUT).untilAtomic(calledSpy, is("Connection refused"));
   }
 
 }

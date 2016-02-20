@@ -103,6 +103,29 @@ vertx.eventBus().send("test", "hello", { reply ->
 
 ----
 
+If when you send the message on the event bus you register a reply handler, it configures the Camel exchange to
+expect a response (it uses the request-reply pattern of the EIP). The response is passed in the reply body. If the
+route fails, you get a reply failure (recipient failure), with the message as cause:
+
+[source,groovy]
+----
+camel.addRoutes(new org.apache.camel.builder.RouteBuilder())
+
+def bridge = io.vertx.ext.camel.CamelBridge.create(vertx, new io.vertx.ext.camel.CamelBridgeOptions(camel).addOutboundMapping(new io.vertx.ext.camel.OutboundMapping().setAddress("camel-route").setUri("direct:my-route")))
+
+camel.start()
+bridge.start()
+
+vertx.eventBus().send("camel-route", "hello", { reply ->
+  if (reply.succeeded()) {
+    def theResponse = reply.result().body()
+  } else {
+    def theCause = reply.cause()
+  }
+})
+
+----
+
 == Stopping the bridge
 
 Don't forget to stop the bridge using the `stop` method.

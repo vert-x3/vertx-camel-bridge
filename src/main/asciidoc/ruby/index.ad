@@ -103,6 +103,29 @@ vertx.event_bus().send("test", "hello") { |reply_err,reply|
 
 ----
 
+If when you send the message on the event bus you register a reply handler, it configures the Camel exchange to
+expect a response (it uses the request-reply pattern of the EIP). The response is passed in the reply body. If the
+route fails, you get a reply failure (recipient failure), with the message as cause:
+
+[source,ruby]
+----
+camel.add_routes(Java::OrgApacheCamelBuilder::RouteBuilder.new())
+
+bridge = Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("camel-route").set_uri("direct:my-route")))
+
+camel.start()
+bridge.start()
+
+vertx.event_bus().send("camel-route", "hello") { |reply_err,reply|
+  if (reply_err == nil)
+    theResponse = reply.body()
+  else
+    theCause = reply_err
+  end
+}
+
+----
+
 == Stopping the bridge
 
 Don't forget to stop the bridge using the `stop` method.

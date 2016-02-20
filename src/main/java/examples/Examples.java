@@ -73,4 +73,28 @@ public class Examples {
       // Reply from the route (here it will be "OK"
     });
   }
+
+  public void example5(Vertx vertx, CamelContext camel) throws Exception {
+    camel.addRoutes(new RouteBuilder() {
+      @Override
+      public void configure() throws Exception {
+        from("direct:my-route")
+            .to("http://localhost:8080");
+      }
+    });
+
+    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+        .addOutboundMapping(new OutboundMapping().setAddress("camel-route").setUri("direct:my-route")));
+
+    camel.start();
+    bridge.start();
+
+    vertx.eventBus().send("camel-route", "hello", reply -> {
+      if (reply.succeeded()) {
+        Object theResponse = reply.result().body();
+      } else {
+        Throwable theCause = reply.cause();
+      }
+    });
+  }
 }

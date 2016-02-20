@@ -99,6 +99,15 @@
  * {@link examples.Examples#example4(io.vertx.core.Vertx, org.apache.camel.CamelContext)}
  * ----
  *
+ * If when you send the message on the event bus you register a reply handler, it configures the Camel exchange to
+ * expect a response (it uses the request-reply pattern of the EIP). The response is passed in the reply body. If the
+ * route fails, you get a reply failure (recipient failure), with the message as cause:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.Examples#example5(io.vertx.core.Vertx, org.apache.camel.CamelContext)}
+ * ----
+ *
  * == Stopping the bridge
  *
  * Don't forget to stop the bridge using the `stop` method.

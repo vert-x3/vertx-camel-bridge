@@ -18,6 +18,7 @@ package io.vertx.ext.camel.impl;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.camel.*;
@@ -87,7 +88,7 @@ public class CamelBridgeImpl implements CamelBridge {
 
             @Override
             public void onFailure(Exchange exchange) {
-              // Ignore it.
+              message.fail(ReplyFailure.RECIPIENT_FAILURE.toInt(), exchange.getException().getMessage());
             }
           });
         }
