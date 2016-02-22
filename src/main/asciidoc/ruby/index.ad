@@ -41,7 +41,7 @@ Before being used, the bridge needs to be configured and started:
 [source,ruby]
 ----
 camel = Java::OrgApacheCamelImpl::DefaultCamelContext.new()
-Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_uri("direct:stuff").set_address("eventbus-address")).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("eventbus-address").set_uri("stream:out"))).start()
+Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel("direct:stuff").to_vertx("eventbus-address")).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("eventbus-address").to_camel("stream:out"))).start()
 
 ----
 
@@ -56,7 +56,7 @@ transformed to event bus messages.
 ----
 endpoint = camel.get_endpoint("direct:foo")
 
-Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_uri("direct:stuff").set_address("eventbus-address")).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_endpoint(endpoint).set_address("eventbus-address")).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_endpoint(endpoint).set_address("eventbus-address").set_headers_copy(false)).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_endpoint(endpoint).set_address("eventbus-address").set_publish(true)).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_endpoint(endpoint).set_address("eventbus-address").set_body_type(Java::JavaLang::String::class)))
+Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel("direct:stuff").to_vertx("eventbus-address")).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address")).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address").without_headers_copy()).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address").use_publish()).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address").with_body_type(Java::JavaLang::String::class)))
 
 ----
 
@@ -79,7 +79,7 @@ are transformed to Camel messages and sent to the endpoint.
 ----
 endpoint = camel.get_endpoint("stream:out")
 
-Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("eventbus-address").set_uri("stream:out")).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("eventbus-address").set_endpoint(endpoint)).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("eventbus-address").set_endpoint(endpoint).set_headers_copy(false)).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("eventbus-address").set_endpoint(endpoint)))
+Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("eventbus-address").to_camel("stream:out")).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("eventbus-address").to_camel(endpoint)).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("eventbus-address").to_camel(endpoint).without_headers_copy()).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("eventbus-address").to_camel(endpoint)))
 
 ----
 
@@ -91,7 +91,7 @@ You can connect your outbound mapping to a Camel route:
 ----
 camel.add_routes(Java::OrgApacheCamelBuilder::RouteBuilder.new())
 
-bridge = Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("test").set_uri("direct:start")))
+bridge = Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("test").to_camel("direct:start")))
 
 camel.start()
 bridge.start()
@@ -111,7 +111,7 @@ route fails, you get a reply failure (recipient failure), with the message as ca
 ----
 camel.add_routes(Java::OrgApacheCamelBuilder::RouteBuilder.new())
 
-bridge = Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.new().set_address("camel-route").set_uri("direct:my-route")))
+bridge = Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("camel-route").to_camel("direct:my-route")))
 
 camel.start()
 bridge.start()

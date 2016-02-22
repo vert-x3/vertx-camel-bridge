@@ -17,6 +17,8 @@ package io.vertx.ext.camel;
 
 import org.apache.camel.Endpoint;
 
+import java.util.Objects;
+
 /**
  * Represents a mapping between a Camel endpoint address and a Vert.x address on the event bus.
  *
@@ -31,23 +33,33 @@ public class InboundMapping extends CamelMapping {
   private Class bodyType;
 
   /**
+   * Creates an {@link InboundMapping} from the given Camel endpoint.
+   *
+   * @param uri the uri - must not be {@code null}
+   * @return the created {@link InboundMapping}
+   */
+  public static InboundMapping fromCamel(String uri) {
+    Objects.requireNonNull(uri);
+    return new InboundMapping().setUri(uri);
+  }
+
+  /**
+   * Creates an {@link InboundMapping} from the given Camel endpoint.
+   *
+   * @param endpoint the endpoint - must not be {@code null}
+   * @return the created {@link InboundMapping}
+   */
+  public static InboundMapping fromCamel(Endpoint endpoint) {
+    Objects.requireNonNull(endpoint);
+    return new InboundMapping().setEndpoint(endpoint);
+  }
+
+  /**
    * @return whether or not {@code publish} is used instead of {@code send}, when a message is sent on the event bus.
    * {@code send} is used by default.
    */
   public boolean isPublish() {
     return publish;
-  }
-
-  /**
-   * Sets whether or not {@code publish} is used instead of {@code send}, when a message is sent on the event bus.
-   * {@code send} is used by default.
-   *
-   * @param publish {@code true} to use {@code publish}
-   * @return the current {@link InboundMapping}
-   */
-  public InboundMapping setPublish(boolean publish) {
-    this.publish = publish;
-    return this;
   }
 
   /**
@@ -65,7 +77,7 @@ public class InboundMapping extends CamelMapping {
    * @param bodyType the body type.
    * @return the current {@link InboundMapping}
    */
-  public InboundMapping setBodyType(Class bodyType) {
+  public InboundMapping withBodyType(Class bodyType) {
     this.bodyType = bodyType;
     return this;
   }
@@ -74,6 +86,26 @@ public class InboundMapping extends CamelMapping {
   public InboundMapping setAddress(String address) {
     super.setAddress(address);
     return this;
+  }
+
+  /**
+   * Fluent version of {@link #setAddress(String)}
+   *
+   * @return the current {@link InboundMapping} instance
+   * @see #setAddress(String)
+   */
+  public InboundMapping toVertx(String address) {
+    return setAddress(address);
+  }
+
+  /**
+   * Fluent version of {@link #setHeadersCopy(boolean)} to disable the headers copy (so the parameter is {@code false}).
+   *
+   * @return the current {@link InboundMapping} instance
+   * @see #setHeadersCopy(boolean)
+   */
+  public InboundMapping withoutHeadersCopy() {
+    return setHeadersCopy(false);
   }
 
   @Override
@@ -91,6 +123,17 @@ public class InboundMapping extends CamelMapping {
   @Override
   public InboundMapping setEndpoint(Endpoint endpoint) {
     super.setEndpoint(endpoint);
+    return this;
+  }
+
+  /**
+   * Sets whether or not {@code publish} is used instead of {@code send}, when a message is sent on the event bus.
+   * {@code send} is used by default, so calling this method instructs the bridge to use {@code publish}.
+   *
+   * @return the current {@link InboundMapping}
+   */
+  public InboundMapping usePublish() {
+    publish = true;
     return this;
   }
 }

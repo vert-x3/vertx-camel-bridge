@@ -17,12 +17,25 @@ package io.vertx.ext.camel;
 
 import org.apache.camel.Endpoint;
 
+import java.util.Objects;
+
 /**
  * Represents a mapping between a Vert.x event bus address and a Camel endpoint.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class OutboundMapping extends CamelMapping {
+
+  /**
+   * Creates an {@link OutboundMapping} from the given Vert.x address.
+   *
+   * @param address the address - must not be {@code null}
+   * @return the created {@link OutboundMapping}
+   */
+  public static OutboundMapping fromVertx(String address) {
+    Objects.requireNonNull(address);
+    return new OutboundMapping().setAddress(address);
+  }
 
   @Override
   public OutboundMapping setAddress(String address) {
@@ -46,5 +59,34 @@ public class OutboundMapping extends CamelMapping {
   public OutboundMapping setEndpoint(Endpoint endpoint) {
     super.setEndpoint(endpoint);
     return this;
+  }
+
+  /**
+   * Fluent version of {@link #setUri(String)}.
+   *
+   * @param uri the uri
+   * @return the current instance of {@link OutboundMapping}
+   */
+  public OutboundMapping toCamel(String uri) {
+    return setUri(uri);
+  }
+
+  /**
+   * Fluent version of {@link #setEndpoint(Endpoint)}.
+   *
+   * @param endpoint the endpoint
+   * @return the current instance of {@link OutboundMapping}
+   */
+  public OutboundMapping toCamel(Endpoint endpoint) {
+    return setEndpoint(endpoint);
+  }
+
+  /**
+   * Fluent version of {@link #setHeadersCopy(boolean)} to disable the headers copy.
+   *
+   * @return the current instance of {@link OutboundMapping}
+   */
+  public OutboundMapping withoutHeadersCopy() {
+    return setHeadersCopy(false);
   }
 }

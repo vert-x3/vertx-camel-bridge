@@ -19,8 +19,8 @@ public class Examples {
     CamelContext camel = new DefaultCamelContext();
     CamelBridge.create(vertx,
         new CamelBridgeOptions(camel)
-            .addInboundMapping(new InboundMapping().setUri("direct:stuff").setAddress("eventbus-address"))
-            .addOutboundMapping(new OutboundMapping().setAddress("eventbus-address").setUri("stream:out"))
+            .addInboundMapping(InboundMapping.fromCamel("direct:stuff").toVertx("eventbus-address"))
+            .addOutboundMapping(OutboundMapping.fromVertx("eventbus-address").toCamel("stream:out"))
     ).start();
   }
 
@@ -29,14 +29,14 @@ public class Examples {
 
     CamelBridge.create(vertx,
         new CamelBridgeOptions(camel)
-            .addInboundMapping(new InboundMapping().setUri("direct:stuff").setAddress("eventbus-address"))
-            .addInboundMapping(new InboundMapping().setEndpoint(endpoint).setAddress("eventbus-address"))
-            .addInboundMapping(new InboundMapping().setEndpoint(endpoint).setAddress("eventbus-address")
-                .setHeadersCopy(false))
-            .addInboundMapping(new InboundMapping().setEndpoint(endpoint).setAddress("eventbus-address")
-                .setPublish(true))
-            .addInboundMapping(new InboundMapping().setEndpoint(endpoint).setAddress("eventbus-address")
-                .setBodyType(String.class))
+            .addInboundMapping(InboundMapping.fromCamel("direct:stuff").toVertx("eventbus-address"))
+            .addInboundMapping(InboundMapping.fromCamel(endpoint).toVertx("eventbus-address"))
+            .addInboundMapping(InboundMapping.fromCamel(endpoint).toVertx("eventbus-address")
+                .withoutHeadersCopy())
+            .addInboundMapping(InboundMapping.fromCamel(endpoint).toVertx("eventbus-address")
+                .usePublish())
+            .addInboundMapping(InboundMapping.fromCamel(endpoint).toVertx("eventbus-address")
+                .withBodyType(String.class))
     );
   }
 
@@ -45,11 +45,11 @@ public class Examples {
 
     CamelBridge.create(vertx,
         new CamelBridgeOptions(camel)
-            .addOutboundMapping(new OutboundMapping().setAddress("eventbus-address").setUri("stream:out"))
-            .addOutboundMapping(new OutboundMapping().setAddress("eventbus-address").setEndpoint(endpoint))
-            .addOutboundMapping(new OutboundMapping().setAddress("eventbus-address").setEndpoint(endpoint)
-                .setHeadersCopy(false))
-            .addOutboundMapping(new OutboundMapping().setAddress("eventbus-address").setEndpoint(endpoint))
+            .addOutboundMapping(OutboundMapping.fromVertx("eventbus-address").toCamel("stream:out"))
+            .addOutboundMapping(OutboundMapping.fromVertx("eventbus-address").toCamel(endpoint))
+            .addOutboundMapping(OutboundMapping.fromVertx("eventbus-address").toCamel(endpoint)
+                .withoutHeadersCopy())
+            .addOutboundMapping(OutboundMapping.fromVertx("eventbus-address").toCamel(endpoint))
     );
   }
 
@@ -63,7 +63,7 @@ public class Examples {
     });
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setUri("direct:start")));
+        .addOutboundMapping(OutboundMapping.fromVertx("test").toCamel("direct:start")));
 
     camel.start();
     bridge.start();
@@ -84,7 +84,7 @@ public class Examples {
     });
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("camel-route").setUri("direct:my-route")));
+        .addOutboundMapping(OutboundMapping.fromVertx("camel-route").toCamel("direct:my-route")));
 
     camel.start();
     bridge.start();

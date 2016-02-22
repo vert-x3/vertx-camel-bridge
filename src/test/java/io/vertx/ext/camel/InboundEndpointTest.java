@@ -34,6 +34,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static com.jayway.awaitility.Awaitility.await;
+import static io.vertx.ext.camel.InboundMapping.fromCamel;
 
 /**
  * Tests that Camel exchanges are propagated to the event bus
@@ -74,7 +75,7 @@ public class InboundEndpointTest {
     Endpoint endpoint = camel.getEndpoint("direct:foo");
 
     bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addInboundMapping(new InboundMapping().setAddress("test").setUri("direct:foo")));
+        .addInboundMapping(fromCamel("direct:foo").toVertx("test")));
 
     vertx.eventBus().consumer("test", message -> {
       context.assertEquals("hello", message.body());
@@ -94,7 +95,7 @@ public class InboundEndpointTest {
     Endpoint endpoint = camel.getEndpoint("direct:foo");
 
     bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addInboundMapping(new InboundMapping().setAddress("test").setUri("direct:foo")));
+        .addInboundMapping(fromCamel("direct:foo").toVertx("test")));
 
     vertx.eventBus().consumer("test", message -> {
       context.assertEquals("hello", message.body());
@@ -119,7 +120,7 @@ public class InboundEndpointTest {
     Endpoint endpoint = camel.getEndpoint("direct:foo");
 
     bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addInboundMapping(new InboundMapping().setAddress("test").setUri("direct:foo").setHeadersCopy(false)));
+        .addInboundMapping(fromCamel("direct:foo").toVertx("test").withoutHeadersCopy()));
 
     vertx.eventBus().consumer("test", message -> {
       context.assertEquals("hello", message.body());
@@ -144,7 +145,7 @@ public class InboundEndpointTest {
     Endpoint endpoint = camel.getEndpoint("direct:foo");
 
     bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addInboundMapping(new InboundMapping().setAddress("test").setEndpoint(endpoint)));
+        .addInboundMapping(fromCamel(endpoint).toVertx("test")));
 
     vertx.eventBus().consumer("test", message -> {
       context.assertEquals("hello", message.body());
@@ -165,7 +166,7 @@ public class InboundEndpointTest {
     Endpoint endpoint = camel.getEndpoint("direct:foo");
 
     bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addInboundMapping(new InboundMapping().setAddress("test").setUri("direct:foo").setPublish(true)));
+        .addInboundMapping(fromCamel(endpoint).toVertx("test").usePublish()));
 
     vertx.eventBus().consumer("test", message -> {
       context.assertEquals("hello", message.body());
@@ -196,7 +197,7 @@ public class InboundEndpointTest {
     Endpoint endpoint = camel.getEndpoint("stomp:queue");
 
     bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addInboundMapping(new InboundMapping().setAddress("test").setEndpoint(endpoint)));
+        .addInboundMapping(fromCamel(endpoint).toVertx("test")));
 
     vertx.eventBus().consumer("test", message -> {
       context.assertEquals("hello", message.body());

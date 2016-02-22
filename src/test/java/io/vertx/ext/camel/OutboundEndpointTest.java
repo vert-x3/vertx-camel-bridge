@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static com.jayway.awaitility.Awaitility.to;
+import static io.vertx.ext.camel.OutboundMapping.fromVertx;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
 import static org.hamcrest.CoreMatchers.is;
@@ -57,11 +58,6 @@ public class OutboundEndpointTest {
 
   private Vertx vertx;
   private DefaultCamelContext camel;
-
-
-  //TODO Test with Vert.x (yes it's stupid, so what)
-  //TODO Test with HTTP (get)
-
 
   @Before
   public void setUp(TestContext context) {
@@ -80,7 +76,7 @@ public class OutboundEndpointTest {
     camel.addEndpoint("output", endpoint);
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setUri("output")));
+        .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
     bridge.start();
@@ -102,7 +98,7 @@ public class OutboundEndpointTest {
     camel.addEndpoint("output", endpoint);
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setUri("output")));
+        .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
     bridge.start();
@@ -121,7 +117,7 @@ public class OutboundEndpointTest {
     camel.addEndpoint("output", endpoint);
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setUri("output")));
+        .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
     bridge.start();
@@ -147,7 +143,7 @@ public class OutboundEndpointTest {
     camel.addEndpoint("output", endpoint);
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setUri("output").setHeadersCopy(false)));
+        .addOutboundMapping(fromVertx("test").toCamel("output").withoutHeadersCopy()));
 
     camel.start();
     bridge.start();
@@ -168,7 +164,7 @@ public class OutboundEndpointTest {
     camel.addEndpoint("output", endpoint);
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setUri("output")));
+        .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
     bridge.start();
@@ -189,7 +185,7 @@ public class OutboundEndpointTest {
     camel.addEndpoint("output", endpoint);
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setUri("output")));
+        .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
     bridge.start();
@@ -207,7 +203,7 @@ public class OutboundEndpointTest {
     camel.addEndpoint("output", endpoint);
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setUri("output")));
+        .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
     bridge.start();
@@ -227,8 +223,8 @@ public class OutboundEndpointTest {
     camel.addEndpoint("output2", endpoint2);
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setUri("output"))
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setEndpoint(endpoint2))
+        .addOutboundMapping(fromVertx("test").toCamel("output"))
+        .addOutboundMapping(fromVertx("test").setEndpoint(endpoint2))
     );
 
     camel.start();
@@ -257,7 +253,7 @@ public class OutboundEndpointTest {
     camel.addEndpoint("output", endpoint);
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setUri("output")));
+        .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
     bridge.start();
@@ -287,7 +283,7 @@ public class OutboundEndpointTest {
     });
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("test").setUri("direct:start")));
+        .addOutboundMapping(fromVertx("test").toCamel("direct:start")));
 
     camel.start();
     bridge.start();
@@ -322,7 +318,7 @@ public class OutboundEndpointTest {
     });
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("camel-route").setUri("direct:my-route")));
+        .addOutboundMapping(fromVertx("camel-route").toCamel("direct:my-route")));
 
     camel.start();
     bridge.start();
@@ -345,7 +341,7 @@ public class OutboundEndpointTest {
     });
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(new OutboundMapping().setAddress("camel-route").setUri("direct:my-route")));
+        .addOutboundMapping(fromVertx("camel-route").toCamel("direct:my-route")));
 
     camel.start();
     bridge.start();
