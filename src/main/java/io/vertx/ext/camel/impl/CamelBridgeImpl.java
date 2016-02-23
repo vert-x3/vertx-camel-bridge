@@ -84,7 +84,7 @@ public class CamelBridgeImpl implements CamelBridge {
             @Override
             public void onComplete(Exchange exchange) {
               Object body = exchange.getIn().getBody();
-              DeliveryOptions delivery = getDeliveryOptions(exchange.getIn(), true);
+              DeliveryOptions delivery = CamelHelper.getDeliveryOptions(exchange.getIn(), true);
               message.reply(body, delivery);
             }
 
@@ -106,28 +106,6 @@ public class CamelBridgeImpl implements CamelBridge {
       camelConsumers.add(endpoint.createConsumer(new CamelToVertxProcessor(vertx, inbound)));
     } catch (Exception e) {
       throw new IllegalStateException("The endpoint " + inbound.getUri() + " does not support consumers");
-    }
-  }
-
-  private DeliveryOptions getDeliveryOptions(Message msg, boolean headerCopy) {
-    DeliveryOptions delivery = new DeliveryOptions();
-    if (headerCopy && msg.hasHeaders()) {
-      msg.getHeaders().entrySet().stream().forEach(entry ->
-          delivery.addHeader(entry.getKey(), entry.getValue().toString()));
-    }
-    return delivery;
-  }
-
-  private Object convert(InboundMapping inbound, Message msg) {
-    if (inbound.getBodyType() != null) {
-      return msg.getBody(inbound.getBodyType());
-    } else {
-      Object body = msg.getBody();
-      if (body instanceof org.fusesource.hawtbuf.Buffer) {
-        // Map to Vert.x buffers.
-        return io.vertx.core.buffer.Buffer.buffer(((Buffer) body).toByteArray());
-      }
-      return body;
     }
   }
 

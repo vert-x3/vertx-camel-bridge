@@ -75,7 +75,6 @@ public class InboundReplyTest {
   }
 
   @Test
-  @Ignore("To fix - it get hello instead of the reply")
   public void testReply() throws Exception {
     Endpoint endpoint = camel.getEndpoint("direct:stuff");
 

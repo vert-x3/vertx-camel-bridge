@@ -48,8 +48,8 @@ public class CamelToVertxProcessor implements AsyncProcessor {
     public boolean process(Exchange exchange, AsyncCallback callback) {
         Message in = exchange.getIn();
 
-        Object body = convert(inbound, in);
-        DeliveryOptions delivery = getDeliveryOptions(in, inbound.isHeadersCopy());
+        Object body = CamelHelper.convert(inbound, in);
+        DeliveryOptions delivery = CamelHelper.getDeliveryOptions(in, inbound.isHeadersCopy());
 
         try {
             if (inbound.isPublish()) {
@@ -82,31 +82,5 @@ public class CamelToVertxProcessor implements AsyncProcessor {
         callback.done(true);
         return true;
     }
-
-
-    // TODO: static class in helper
-    private DeliveryOptions getDeliveryOptions(Message msg, boolean headerCopy) {
-        DeliveryOptions delivery = new DeliveryOptions();
-        if (headerCopy && msg.hasHeaders()) {
-            msg.getHeaders().entrySet().stream().forEach(entry ->
-                    delivery.addHeader(entry.getKey(), entry.getValue().toString()));
-        }
-        return delivery;
-    }
-
-    // TODO: static class in helper
-    private Object convert(InboundMapping inbound, Message msg) {
-        if (inbound.getBodyType() != null) {
-            return msg.getBody(inbound.getBodyType());
-        } else {
-            Object body = msg.getBody();
-            if (body instanceof org.fusesource.hawtbuf.Buffer) {
-                // Map to Vert.x buffers.
-                return io.vertx.core.buffer.Buffer.buffer(((Buffer) body).toByteArray());
-            }
-            return body;
-        }
-    }
-
 
 }
