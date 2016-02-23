@@ -60,7 +60,7 @@ public class CamelMapping {
   }
 
   /**
-   * @return whther or not the headers of the input message are copied in the output message.
+   * @return whether or not the headers of the input message are copied in the output message.
    */
   public boolean isHeadersCopy() {
     return headersCopy;

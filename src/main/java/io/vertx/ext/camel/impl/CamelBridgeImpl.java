@@ -16,15 +16,11 @@
 package io.vertx.ext.camel.impl;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.camel.*;
 import org.apache.camel.*;
-import org.apache.camel.spi.Synchronization;
-import org.fusesource.hawtbuf.Buffer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +35,7 @@ public class CamelBridgeImpl implements CamelBridge {
 
   private final CamelContext camel;
   private final List<Consumer> camelConsumers = new ArrayList<>();
+  private final List<Producer> camelProducers = new ArrayList<>();
   private final List<MessageConsumer> vertxConsumers = new ArrayList<>();
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CamelBridgeImpl.class);
@@ -62,40 +59,20 @@ public class CamelBridgeImpl implements CamelBridge {
   }
 
   private void createOutboundBridge(Vertx vertx, OutboundMapping outbound) {
-    validate(outbound);
+    Endpoint endpoint = validate(outbound);
+
+    Producer producer;
+    try {
+      producer = endpoint.createProducer();
+      camelProducers.add(producer);
+    } catch (Exception e) {
+      throw new IllegalStateException("The endpoint " + outbound.getUri() + " does not support producers");
+    }
+
     LOGGER.info("Creating Vert.x message consumer for " + outbound.getUri() + " receiving messages from " + outbound
         .getAddress());
-      // TODO: a bit similar to what I did for CamelToVertxProcessor
 
-    vertxConsumers.add(vertx.eventBus().consumer(outbound.getAddress(), message -> {
-      ProducerTemplate template = camel.createProducerTemplate();
-      template.asyncSend(outbound.getUri(), exchange -> {
-
-        Message in = exchange.getIn();
-        in.setBody(message.body());
-        if (outbound.isHeadersCopy()) {
-          in.setHeaders(MultiMapHelper.toMap(message.headers()));
-        }
-        if (message.replyAddress() != null) {
-          // If we have a reply address, switch to InOut and expect register a synchronization instance to retrieve
-          // the Camel reply.
-          exchange.setPattern(ExchangePattern.InOut);
-          exchange.addOnCompletion(new Synchronization() {
-            @Override
-            public void onComplete(Exchange exchange) {
-              Object body = exchange.getIn().getBody();
-              DeliveryOptions delivery = CamelHelper.getDeliveryOptions(exchange.getIn(), true);
-              message.reply(body, delivery);
-            }
-
-            @Override
-            public void onFailure(Exchange exchange) {
-              message.fail(ReplyFailure.RECIPIENT_FAILURE.toInt(), exchange.getException().getMessage());
-            }
-          });
-        }
-      });
-    }));
+    vertxConsumers.add(vertx.eventBus().consumer(outbound.getAddress(), new FromVertxToCamelProducer(producer, vertx, outbound)));
   }
 
   private void createInboundBridge(Vertx vertx, InboundMapping inbound) {
@@ -126,6 +103,13 @@ public class CamelBridgeImpl implements CamelBridge {
         throw new IllegalStateException("Cannot start consumer", e);
       }
     });
+    camelProducers.stream().forEach(c -> {
+      try {
+        c.start();
+      } catch (Exception e) {
+        throw new IllegalStateException("Cannot start producer", e);
+      }
+    });
     return this;
   }
 
@@ -136,6 +120,13 @@ public class CamelBridgeImpl implements CamelBridge {
         c.stop();
       } catch (Exception e) {
         throw new IllegalStateException("Cannot stop consumer", e);
+      }
+    });
+    camelProducers.stream().forEach(c -> {
+      try {
+        c.stop();
+      } catch (Exception e) {
+        throw new IllegalStateException("Cannot stop producer", e);
       }
     });
     vertxConsumers.stream().forEach(MessageConsumer::unregister);
