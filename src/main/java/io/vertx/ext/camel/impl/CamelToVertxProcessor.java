@@ -26,60 +26,60 @@ import org.apache.camel.util.AsyncProcessorHelper;
 import org.apache.camel.util.ExchangeHelper;
 
 /**
- * To send from Camel to vert.x
+ * Processor to send messages from Camel to Vert.x (inbound).
  */
 public class CamelToVertxProcessor implements AsyncProcessor {
 
-    private final Vertx vertx;
-    private final InboundMapping inbound;
+  private final Vertx vertx;
+  private final InboundMapping inbound;
 
-    public CamelToVertxProcessor(Vertx vertx, InboundMapping inbound) {
-        this.vertx = vertx;
-        this.inbound = inbound;
-    }
+  public CamelToVertxProcessor(Vertx vertx, InboundMapping inbound) {
+    this.vertx = vertx;
+    this.inbound = inbound;
+  }
 
-    @Override
-    public void process(Exchange exchange) throws Exception {
-        AsyncProcessorHelper.process(this, exchange);
-    }
+  @Override
+  public void process(Exchange exchange) throws Exception {
+    AsyncProcessorHelper.process(this, exchange);
+  }
 
-    @Override
-    public boolean process(Exchange exchange, AsyncCallback callback) {
-        Message in = exchange.getIn();
+  @Override
+  public boolean process(Exchange exchange, AsyncCallback callback) {
+    Message in = exchange.getIn();
 
-        Object body = CamelHelper.convert(inbound, in);
-        DeliveryOptions delivery = CamelHelper.getDeliveryOptions(in, inbound.isHeadersCopy());
+    Object body = CamelHelper.convert(inbound, in);
+    DeliveryOptions delivery = CamelHelper.getDeliveryOptions(in, inbound.isHeadersCopy());
 
-        try {
-            if (inbound.isPublish()) {
-                vertx.eventBus().publish(inbound.getAddress(), body.toString(), delivery);
+    try {
+      if (inbound.isPublish()) {
+        vertx.eventBus().publish(inbound.getAddress(), body.toString(), delivery);
+      } else {
+        if (ExchangeHelper.isOutCapable(exchange)) {
+          vertx.eventBus().send(inbound.getAddress(), body.toString(), delivery, reply -> {
+            Message out = exchange.getOut();
+            if (reply.succeeded()) {
+              out.setBody(reply.result().body());
+              out.setHeaders(MultiMapHelper.toMap(reply.result().headers()));
             } else {
-                if (ExchangeHelper.isOutCapable(exchange)) {
-                    vertx.eventBus().send(inbound.getAddress(), body.toString(), delivery, reply -> {
-                        Message out = exchange.getOut();
-                        if (reply.succeeded()) {
-                            out.setBody(reply.result().body());
-                            out.setHeaders(MultiMapHelper.toMap(reply.result().headers()));
-                        } else {
-                            exchange.setException(reply.cause());
-                        }
-                        // continue callback
-                        callback.done(false);
-                    });
-
-                    // being routed async so return false
-                    return false;
-                } else {
-                    // No reply expected.
-                    vertx.eventBus().send(inbound.getAddress(), body.toString(), delivery);
-                }
+              exchange.setException(reply.cause());
             }
-        } catch (Throwable e) {
-            exchange.setException(e);
-        }
+            // continue callback
+            callback.done(false);
+          });
 
-        callback.done(true);
-        return true;
+          // being routed async so return false
+          return false;
+        } else {
+          // No reply expected.
+          vertx.eventBus().send(inbound.getAddress(), body.toString(), delivery);
+        }
+      }
+    } catch (Throwable e) {
+      exchange.setException(e);
     }
+
+    callback.done(true);
+    return true;
+  }
 
 }
