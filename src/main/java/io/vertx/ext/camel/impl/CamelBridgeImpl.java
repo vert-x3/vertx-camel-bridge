@@ -65,6 +65,8 @@ public class CamelBridgeImpl implements CamelBridge {
     validate(outbound);
     LOGGER.info("Creating Vert.x message consumer for " + outbound.getUri() + " receiving messages from " + outbound
         .getAddress());
+      // TODO: a bit similar to what I did for CamelToVertxProcessor
+
     vertxConsumers.add(vertx.eventBus().consumer(outbound.getAddress(), message -> {
       ProducerTemplate template = camel.createProducerTemplate();
       template.asyncSend(outbound.getUri(), exchange -> {
@@ -82,7 +84,7 @@ public class CamelBridgeImpl implements CamelBridge {
             @Override
             public void onComplete(Exchange exchange) {
               Object body = exchange.getIn().getBody();
-              DeliveryOptions delivery = getDeliveryOptions(exchange.getIn(), true);
+              DeliveryOptions delivery = CamelHelper.getDeliveryOptions(exchange.getIn(), true);
               message.reply(body, delivery);
             }
 
@@ -101,61 +103,9 @@ public class CamelBridgeImpl implements CamelBridge {
 
     try {
       LOGGER.info("Creating camel consumer for " + inbound.getUri() + " sending messages to " + inbound.getAddress());
-      camelConsumers.add(
-          // The mapping is the following:
-          // For each exchange, we copy the body and the headers (if enabled) in to an event bus message
-          // If the exchange has the InOut pattern, we add a reply handler.
-          endpoint.createConsumer(exchange -> {
-
-            Message in = exchange.getIn();
-
-            Object body = convert(inbound, in);
-            DeliveryOptions delivery = getDeliveryOptions(in, inbound.isHeadersCopy());
-
-            if (inbound.isPublish()) {
-              vertx.eventBus().publish(inbound.getAddress(), body.toString(), delivery);
-            } else {
-              if (exchange.getPattern() == ExchangePattern.InOut) {
-                vertx.eventBus().send(inbound.getAddress(), body.toString(), delivery, reply -> {
-                  Message out = exchange.getOut();
-                  if (reply.succeeded()) {
-                    out.setBody(reply.result().body());
-                    out.setHeaders(MultiMapHelper.toMap(reply.result().headers()));
-                  } else {
-                    out.setFault(true);
-                    out.setHeader("error", reply.cause().getMessage());
-                  }
-                });
-              } else {
-                // No reply expected.
-                vertx.eventBus().send(inbound.getAddress(), body.toString(), delivery);
-              }
-            }
-          }));
+      camelConsumers.add(endpoint.createConsumer(new CamelToVertxProcessor(vertx, inbound)));
     } catch (Exception e) {
       throw new IllegalStateException("The endpoint " + inbound.getUri() + " does not support consumers");
-    }
-  }
-
-  private DeliveryOptions getDeliveryOptions(Message msg, boolean headerCopy) {
-    DeliveryOptions delivery = new DeliveryOptions();
-    if (headerCopy && msg.hasHeaders()) {
-      msg.getHeaders().entrySet().stream().forEach(entry ->
-          delivery.addHeader(entry.getKey(), entry.getValue().toString()));
-    }
-    return delivery;
-  }
-
-  private Object convert(InboundMapping inbound, Message msg) {
-    if (inbound.getBodyType() != null) {
-      return msg.getBody(inbound.getBodyType());
-    } else {
-      Object body = msg.getBody();
-      if (body instanceof org.fusesource.hawtbuf.Buffer) {
-        // Map to Vert.x buffers.
-        return io.vertx.core.buffer.Buffer.buffer(((Buffer) body).toByteArray());
-      }
-      return body;
     }
   }
 
