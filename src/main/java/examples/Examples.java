@@ -7,8 +7,11 @@ import io.vertx.ext.camel.InboundMapping;
 import io.vertx.ext.camel.OutboundMapping;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
+import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
+
+import java.util.concurrent.Future;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -70,7 +73,7 @@ public class Examples {
 
 
     vertx.eventBus().send("test", "hello", reply -> {
-      // Reply from the route (here it will be "OK"
+      // Reply from the route (here it's "OK")
     });
   }
 
@@ -96,5 +99,24 @@ public class Examples {
         Throwable theCause = reply.cause();
       }
     });
+  }
+
+  public void example6(Vertx vertx, CamelContext camel) throws Exception {
+    Endpoint endpoint = camel.getEndpoint("direct:stuff");
+
+    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+        .addInboundMapping(new InboundMapping().setAddress("test-reply").setEndpoint(endpoint)));
+
+    vertx.eventBus().consumer("with-reply", message -> {
+      message.reply("How are you ?");
+    });
+
+    camel.start();
+    bridge.start();
+
+    ProducerTemplate template = camel.createProducerTemplate();
+    Future<Object> future = template.asyncRequestBody(endpoint, "hello");
+    String response = template.extractFutureBody(future, String.class);
+    // response == Haw are you ?
   }
 }

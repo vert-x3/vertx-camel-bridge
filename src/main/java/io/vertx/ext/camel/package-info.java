@@ -80,6 +80,14 @@
  *
  * _Note_: `org.fusesource.hawtbuf.Buffer` are automatically converted to {@link io.vertx.core.buffer.Buffer}.
  *
+ * If `send` is used (so not `publish`), and when the Camel exchange expect a reply (_In Out_ exchange), the Vert.x
+ * code expect as reply to the sent message. When the reply arrives it is propagated to the exchange:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.Examples#example6(io.vertx.core.Vertx, org.apache.camel.CamelContext)}
+ * ----
+ *
  * === Outbound mapping
  *
  * Outbound mapping associates an event bus address to a Camel endpoint. Messages received on this event bus address

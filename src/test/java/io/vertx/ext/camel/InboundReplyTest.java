@@ -82,7 +82,6 @@ public class InboundReplyTest {
         .addInboundMapping(new InboundMapping().setAddress("test-reply").setEndpoint(endpoint)));
 
     vertx.eventBus().consumer("test-reply", message -> {
-      System.err.println("Sending reply");
       message.reply("How are you ?");
     });
 
@@ -91,7 +90,6 @@ public class InboundReplyTest {
 
     ProducerTemplate template = camel.createProducerTemplate();
     Future<Object> future = template.asyncRequestBody(endpoint, "hello");
-    future.get();
     String response = template.extractFutureBody(future, String.class);
     assertThat(response).isEqualTo("How are you ?");
   }

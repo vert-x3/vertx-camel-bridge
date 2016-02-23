@@ -88,7 +88,7 @@ public class OutboundEndpointTest {
 
     Exchange exchange = endpoint.getExchanges().get(0);
     assertThat(exchange.getIn().getBody()).isEqualTo("hello");
-    assertThat(exchange.getIn().getHeaders()).hasSize(1);
+    assertThat(exchange.getIn().getHeaders()).hasSize(0);
   }
 
   @Test
@@ -155,7 +155,7 @@ public class OutboundEndpointTest {
 
     Exchange exchange = endpoint.getExchanges().get(0);
     assertThat(exchange.getIn().getBody()).isEqualTo("hello");
-    assertThat(exchange.getIn().getHeaders()).doesNotContainKey("key").hasSize(1);
+    assertThat(exchange.getIn().getHeaders()).doesNotContainKey("key");
   }
 
   @Test
@@ -176,7 +176,7 @@ public class OutboundEndpointTest {
 
     Exchange exchange = endpoint.getExchanges().get(0);
     assertThat(exchange.getIn().getBody()).isEqualTo("hello");
-    assertThat(exchange.getIn().getHeaders()).contains(entry("key", "value")).hasSize(2);
+    assertThat(exchange.getIn().getHeaders()).contains(entry("key", "value")).hasSize(1);
   }
 
   @Test

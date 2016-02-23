@@ -70,6 +70,29 @@ sets, it looks in the Camel context for a converter between the Camel message pa
 
 _Note_: `org.fusesource.hawtbuf.Buffer` are automatically converted to `link:../../yardoc/Vertx/Buffer.html[Buffer]`.
 
+If `send` is used (so not `publish`), and when the Camel exchange expect a reply (_In Out_ exchange), the Vert.x
+code expect as reply to the sent message. When the reply arrives it is propagated to the exchange:
+
+[source,ruby]
+----
+endpoint = camel.get_endpoint("direct:stuff")
+
+bridge = Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_address("test-reply").set_endpoint(endpoint)))
+
+vertx.event_bus().consumer("with-reply") { |message|
+  message.reply("How are you ?")
+}
+
+camel.start()
+bridge.start()
+
+template = camel.create_producer_template()
+future = template.async_request_body(endpoint, "hello")
+response = template.extract_future_body(future, Java::JavaLang::String::class)
+# response == Haw are you ?
+
+----
+
 === Outbound mapping
 
 Outbound mapping associates an event bus address to a Camel endpoint. Messages received on this event bus address
@@ -98,7 +121,7 @@ bridge.start()
 
 
 vertx.event_bus().send("test", "hello") { |reply_err,reply|
-  # Reply from the route (here it will be "OK"
+  # Reply from the route (here it's "OK")
 }
 
 ----
