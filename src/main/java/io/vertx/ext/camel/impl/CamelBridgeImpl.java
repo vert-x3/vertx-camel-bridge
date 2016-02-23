@@ -72,7 +72,7 @@ public class CamelBridgeImpl implements CamelBridge {
     LOGGER.info("Creating Vert.x message consumer for " + outbound.getUri() + " receiving messages from " + outbound
         .getAddress());
 
-    vertxConsumers.add(vertx.eventBus().consumer(outbound.getAddress(), new FromVertxToCamelProducer(producer, vertx, outbound)));
+    vertxConsumers.add(vertx.eventBus().consumer(outbound.getAddress(), new FromVertxToCamelProducer(producer, outbound)));
   }
 
   private void createInboundBridge(Vertx vertx, InboundMapping inbound) {

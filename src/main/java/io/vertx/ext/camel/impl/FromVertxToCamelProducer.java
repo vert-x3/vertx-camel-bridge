@@ -16,7 +16,6 @@
 package io.vertx.ext.camel.impl;
 
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.ext.camel.OutboundMapping;
@@ -30,13 +29,11 @@ public class FromVertxToCamelProducer implements Handler<io.vertx.core.eventbus.
 
   private final Endpoint endpoint;
   private final AsyncProcessor producer;
-  private final Vertx vertx;
   private final OutboundMapping outbound;
 
-  public FromVertxToCamelProducer(Producer producer, Vertx vertx, OutboundMapping outbound) {
+  public FromVertxToCamelProducer(Producer producer, OutboundMapping outbound) {
     this.endpoint = producer.getEndpoint();
     this.producer = AsyncProcessorConverterHelper.convert(producer);
-    this.vertx = vertx;
     this.outbound = outbound;
   }
 
@@ -51,10 +48,11 @@ public class FromVertxToCamelProducer implements Handler<io.vertx.core.eventbus.
       in.setHeaders(MultiMapHelper.toMap(vertxMessage.headers()));
     }
 
+    // It's an async producer so won't block.
     producer.process(exchange, new CamelProducerCallback(exchange, vertxMessage));
   }
 
-  private final class CamelProducerCallback implements AsyncCallback {
+  private static final class CamelProducerCallback implements AsyncCallback {
 
     private final Exchange exchange;
     private final io.vertx.core.eventbus.Message<Object> vertxMessage;
@@ -66,6 +64,8 @@ public class FromVertxToCamelProducer implements Handler<io.vertx.core.eventbus.
 
     @Override
     public void done(boolean done) {
+      // Method called in a Camel thread.
+
       // when we are done then send back reply to vertx if we are supposed to
       if (vertxMessage.replyAddress() != null) {
         // if the exchange failed with an exception then fail
