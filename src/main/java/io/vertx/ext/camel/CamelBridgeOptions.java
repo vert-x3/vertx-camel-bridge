@@ -28,6 +28,9 @@ import java.util.Objects;
  */
 public class CamelBridgeOptions {
 
+  // This class is not a DataObject as it's not polyglot and requires object not serializable from / to Json (Camel
+  // context).
+
   private List<InboundMapping> inbound = new ArrayList<>();
   private List<OutboundMapping> outbound = new ArrayList<>();
 
