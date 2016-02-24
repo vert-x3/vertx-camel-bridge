@@ -58,7 +58,11 @@
  * {@link examples.Examples#example1(io.vertx.core.Vertx)}
  * ----
  *
- * The bridge requires a `CamelContext`. It will find the endpoint from the context.
+ * The bridge requires a `CamelContext`. It will find the endpoint from the context. The bridge needs to be started
+ * before being used. Be aware the the `start` method is asynchronous. You can use
+ * {@link io.vertx.ext.camel.CamelBridge#start(io.vertx.core.Handler)} to be notified when the bridge has been started.
+ *
+ *
  *
  * === Inbound mapping
  *
@@ -118,7 +122,8 @@
  *
  * == Stopping the bridge
  *
- * Don't forget to stop the bridge using the `stop` method.
+ * Don't forget to stop the bridge using the `stop` method. The `stop` method is asynchronous. You can use
+ * {@link io.vertx.ext.camel.CamelBridge#stop(io.vertx.core.Handler)} to be notified when the bridge has been stopped.
  *
  */
 @ModuleGen(name = "vertx-camel-bridge", groupPackage = "io.vertx.ext.camel")

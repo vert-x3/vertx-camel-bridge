@@ -15,12 +15,17 @@
  */
 package io.vertx.ext.camel.impl;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.camel.*;
-import org.apache.camel.*;
+import org.apache.camel.CamelContext;
+import org.apache.camel.Consumer;
+import org.apache.camel.Endpoint;
+import org.apache.camel.Producer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +44,7 @@ public class CamelBridgeImpl implements CamelBridge {
   private final List<MessageConsumer> vertxConsumers = new ArrayList<>();
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CamelBridgeImpl.class);
+  private final Vertx vertx;
 
 
   public CamelBridgeImpl(Vertx vertx, CamelBridgeOptions options) {
@@ -46,6 +52,7 @@ public class CamelBridgeImpl implements CamelBridge {
     Objects.requireNonNull(options);
     this.camel = options.getCamelContext();
     Objects.requireNonNull(camel);
+    this.vertx = vertx;
 
     for (InboundMapping inbound : options.getInboundMappings()) {
       // camel -> vert.x
@@ -66,7 +73,7 @@ public class CamelBridgeImpl implements CamelBridge {
       producer = endpoint.createProducer();
       camelProducers.add(producer);
     } catch (Exception e) {
-      throw new IllegalStateException("The endpoint " + outbound.getUri() + " does not support producers");
+      throw new IllegalStateException("The endpoint " + outbound.getUri() + " does not support producers", e);
     }
 
     LOGGER.info("Creating Vert.x message consumer for " + outbound.getUri() + " receiving messages from " + outbound
@@ -96,40 +103,63 @@ public class CamelBridgeImpl implements CamelBridge {
 
   @Override
   public CamelBridge start() {
-    camelConsumers.stream().forEach(c -> {
-      try {
-        c.start();
-      } catch (Exception e) {
-        throw new IllegalStateException("Cannot start consumer", e);
-      }
-    });
-    camelProducers.stream().forEach(c -> {
-      try {
-        c.start();
-      } catch (Exception e) {
-        throw new IllegalStateException("Cannot start producer", e);
-      }
-    });
+    return start(null);
+  }
+
+  @Override
+  public CamelBridge start(Handler<AsyncResult<Void>> completed) {
+    vertx.<Void>executeBlocking(
+        future -> {
+          camelConsumers.stream().forEach(c -> {
+            try {
+              c.start();
+            } catch (Exception e) {
+              future.fail(e);
+            }
+          });
+          camelProducers.stream().forEach(c -> {
+            try {
+              c.start();
+            } catch (Exception e) {
+              future.fail(e);
+            }
+          });
+          future.complete();
+        },
+        completed
+    );
     return this;
   }
 
   @Override
   public CamelBridge stop() {
-    camelConsumers.stream().forEach(c -> {
-      try {
-        c.stop();
-      } catch (Exception e) {
-        throw new IllegalStateException("Cannot stop consumer", e);
-      }
-    });
-    camelProducers.stream().forEach(c -> {
-      try {
-        c.stop();
-      } catch (Exception e) {
-        throw new IllegalStateException("Cannot stop producer", e);
-      }
-    });
-    vertxConsumers.stream().forEach(MessageConsumer::unregister);
+    return stop(null);
+  }
+
+  @Override
+  public CamelBridge stop(Handler<AsyncResult<Void>> completed) {
+    vertx.<Void>executeBlocking(
+        future -> {
+          camelConsumers.stream().forEach(c -> {
+            try {
+              c.stop();
+            } catch (Exception e) {
+              future.fail(e);
+            }
+          });
+          camelProducers.stream().forEach(c -> {
+            try {
+              c.stop();
+            } catch (Exception e) {
+              future.fail(e);
+            }
+          });
+          vertxConsumers.stream().forEach(MessageConsumer::unregister);
+          future.complete();
+        },
+        completed
+    );
+
     return this;
   }
 

@@ -60,7 +60,7 @@ public class InboundEndpointTest {
 
   @After
   public void tearDown(TestContext context) throws Exception {
-    bridge.stop();
+    BridgeHelper.syncStop(bridge);
     camel.stop();
     if (stomp != null) {
       stomp.close(context.asyncAssertSuccess());
@@ -83,7 +83,7 @@ public class InboundEndpointTest {
     });
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     ProducerTemplate producer = camel.createProducerTemplate();
     producer.asyncSendBody(endpoint, "hello");
@@ -104,7 +104,7 @@ public class InboundEndpointTest {
     });
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     ProducerTemplate producer = camel.createProducerTemplate();
     producer.asyncSend(endpoint, exchange -> {
@@ -129,7 +129,7 @@ public class InboundEndpointTest {
     });
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     ProducerTemplate producer = camel.createProducerTemplate();
     producer.asyncSend(endpoint, exchange -> {
@@ -153,7 +153,7 @@ public class InboundEndpointTest {
     });
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     ProducerTemplate producer = camel.createProducerTemplate();
     producer.asyncSendBody(endpoint, "hello");
@@ -179,7 +179,7 @@ public class InboundEndpointTest {
     });
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     ProducerTemplate producer = camel.createProducerTemplate();
     producer.asyncSendBody(endpoint, "hello");
@@ -205,7 +205,7 @@ public class InboundEndpointTest {
     });
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     StompClient.create(vertx).connect(connection -> {
       // /queue, don't ask why they added a /

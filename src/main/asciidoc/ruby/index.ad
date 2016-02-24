@@ -45,7 +45,11 @@ Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBri
 
 ----
 
-The bridge requires a `CamelContext`. It will find the endpoint from the context.
+The bridge requires a `CamelContext`. It will find the endpoint from the context. The bridge needs to be started
+before being used. Be aware the the `start` method is asynchronous. You can use
+`link:unavailable#start-instance_method[start]` to be notified when the bridge has been started.
+
+
 
 === Inbound mapping
 
@@ -151,4 +155,5 @@ vertx.event_bus().send("camel-route", "hello") { |reply_err,reply|
 
 == Stopping the bridge
 
-Don't forget to stop the bridge using the `stop` method.
+Don't forget to stop the bridge using the `stop` method. The `stop` method is asynchronous. You can use
+`link:unavailable#stop-instance_method[stop]` to be notified when the bridge has been stopped.

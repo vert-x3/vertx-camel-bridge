@@ -15,77 +15,62 @@
  */
 package io.vertx.ext.camel;
 
-import com.jayway.awaitility.Duration;
 import io.vertx.core.Vertx;
-import io.vertx.ext.stomp.StompServer;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.camel.Endpoint;
-import org.apache.camel.ProducerTemplate;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.Future;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static io.vertx.ext.camel.InboundMapping.fromCamel;
 
 /**
- * Test inbound mapping replies.
+ * Check start-stop sequences.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @RunWith(VertxUnitRunner.class)
-public class InboundReplyTest {
-
-  private static final Duration DEFAULT_TIMEOUT = Duration.TEN_SECONDS;
+public class BridgeStartStop {
 
   private Vertx vertx;
   private DefaultCamelContext camel;
 
-  private StompServer stomp;
   private CamelBridge bridge;
 
-  //TODO Test with route
-
   @Before
-  public void setUp(TestContext context) {
+  public void setUp() {
     vertx = Vertx.vertx();
     camel = new DefaultCamelContext();
   }
 
   @After
   public void tearDown(TestContext context) throws Exception {
-    bridge.stop();
     camel.stop();
-    if (stomp != null) {
-      stomp.close(context.asyncAssertSuccess());
-    }
-
     vertx.close(context.asyncAssertSuccess());
   }
 
+
   @Test
-  public void testReply() throws Exception {
-    Endpoint endpoint = camel.getEndpoint("direct:stuff");
-
+  public void startStopSequence() throws InterruptedException {
     bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addInboundMapping(new InboundMapping().setAddress("test-reply").setEndpoint(endpoint)));
+        .addInboundMapping(fromCamel("direct:foo").toVertx("test")));
 
-    vertx.eventBus().consumer("test-reply", message -> {
-      message.reply("How are you ?");
-    });
+    bridge.start();
 
-    camel.start();
-    BridgeHelper.syncStart(bridge);
+    Thread.sleep(10);
 
-    ProducerTemplate template = camel.createProducerTemplate();
-    Future<Object> future = template.asyncRequestBody(endpoint, "hello");
-    String response = template.extractFutureBody(future, String.class);
-    assertThat(response).isEqualTo("How are you ?");
+    bridge.stop();
   }
 
+  @Test
+  public void startStopSequenceAsync() throws InterruptedException {
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+        .addInboundMapping(fromCamel("direct:foo").toVertx("test")));
+
+    BridgeHelper.syncStart(bridge);
+    BridgeHelper.syncStop(bridge);
+  }
 
 }

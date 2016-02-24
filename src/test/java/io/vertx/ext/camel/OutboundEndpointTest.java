@@ -58,15 +58,18 @@ public class OutboundEndpointTest {
 
   private Vertx vertx;
   private DefaultCamelContext camel;
+  private CamelBridge bridge;
 
   @Before
-  public void setUp(TestContext context) {
+  public void setUp() {
     vertx = Vertx.vertx();
     camel = new DefaultCamelContext();
   }
 
   @After
-  public void tearDown(TestContext context) {
+  public void tearDown(TestContext context) throws Exception {
+    BridgeHelper.syncStop(bridge);
+    camel.stop();
     vertx.close(context.asyncAssertSuccess());
   }
 
@@ -75,11 +78,11 @@ public class OutboundEndpointTest {
     MockEndpoint endpoint = (MockEndpoint) camel.getComponent("mock").createEndpoint("mock:foo");
     camel.addEndpoint("output", endpoint);
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     vertx.eventBus().send("test", "hello");
 
@@ -97,11 +100,11 @@ public class OutboundEndpointTest {
     MockEndpoint endpoint = (MockEndpoint) camel.getComponent("mock").createEndpoint("mock:foo");
     camel.addEndpoint("output", endpoint);
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     vertx.eventBus().send("test", bytes);
 
@@ -116,11 +119,11 @@ public class OutboundEndpointTest {
     MockEndpoint endpoint = (MockEndpoint) camel.getComponent("mock").createEndpoint("mock:foo");
     camel.addEndpoint("output", endpoint);
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     vertx.eventBus().send("test", Buffer.buffer(bytes));
 
@@ -142,11 +145,11 @@ public class OutboundEndpointTest {
     MockEndpoint endpoint = (MockEndpoint) camel.getComponent("mock").createEndpoint("mock:foo");
     camel.addEndpoint("output", endpoint);
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("test").toCamel("output").withoutHeadersCopy()));
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     vertx.eventBus().send("test", "hello", new DeliveryOptions().addHeader("key", "value"));
 
@@ -163,11 +166,11 @@ public class OutboundEndpointTest {
     MockEndpoint endpoint = (MockEndpoint) camel.getComponent("mock").createEndpoint("mock:foo");
     camel.addEndpoint("output", endpoint);
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     vertx.eventBus().send("test", "hello", new DeliveryOptions().addHeader("key", "value"));
 
@@ -184,11 +187,11 @@ public class OutboundEndpointTest {
     MockEndpoint endpoint = (MockEndpoint) camel.getComponent("mock").createEndpoint("mock:foo");
     camel.addEndpoint("output", endpoint);
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     vertx.eventBus().send("test", "hello");
     vertx.eventBus().send("test", "hello2");
@@ -202,11 +205,11 @@ public class OutboundEndpointTest {
     MockEndpoint endpoint = (MockEndpoint) camel.getComponent("mock").createEndpoint("mock:foo?retainLast=2");
     camel.addEndpoint("output", endpoint);
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     vertx.eventBus().send("test", "hello");
     vertx.eventBus().send("test", "hello2");
@@ -222,13 +225,13 @@ public class OutboundEndpointTest {
     camel.addEndpoint("output", endpoint);
     camel.addEndpoint("output2", endpoint2);
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("test").toCamel("output"))
         .addOutboundMapping(fromVertx("test").setEndpoint(endpoint2))
     );
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     vertx.eventBus().publish("test", "hello");
     vertx.eventBus().publish("test", "hello2");
@@ -252,11 +255,11 @@ public class OutboundEndpointTest {
     Endpoint endpoint = camel.getEndpoint("stream:file?fileName=target/junk/foo.txt");
     camel.addEndpoint("output", endpoint);
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     long date = System.currentTimeMillis();
     vertx.eventBus().send("test", date);
@@ -282,11 +285,11 @@ public class OutboundEndpointTest {
       }
     });
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("test").toCamel("direct:start")));
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     Async async = context.async();
     vertx.eventBus().send("test", "hello", reply -> {
@@ -317,11 +320,11 @@ public class OutboundEndpointTest {
       }
     });
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("camel-route").toCamel("direct:my-route")));
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     vertx.eventBus().send("camel-route", "hello");
 
@@ -340,11 +343,11 @@ public class OutboundEndpointTest {
       }
     });
 
-    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(fromVertx("camel-route").toCamel("direct:my-route")));
 
     camel.start();
-    bridge.start();
+    BridgeHelper.syncStart(bridge);
 
     vertx.eventBus().send("camel-route", "hello", reply -> {
       calledSpy.set(reply.cause().getMessage());
