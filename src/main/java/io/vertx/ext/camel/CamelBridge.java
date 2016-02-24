@@ -29,7 +29,7 @@ public interface CamelBridge {
    * Creates a bridge between Camel endpoints and Vert.x
    *
    * @param vertx         the vert.x instance
-   * @param bridgeOptions the birdge configuration
+   * @param bridgeOptions the bridge configuration
    * @return the created {@link CamelBridge}. It must be started explicitly.
    */
   static CamelBridge create(Vertx vertx, CamelBridgeOptions bridgeOptions) {
