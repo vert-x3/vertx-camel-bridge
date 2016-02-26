@@ -117,6 +117,6 @@ public class Examples {
     ProducerTemplate template = camel.createProducerTemplate();
     Future<Object> future = template.asyncRequestBody(endpoint, "hello");
     String response = template.extractFutureBody(future, String.class);
-    // response == Haw are you ?
+    // response == How are you ?
   }
 }

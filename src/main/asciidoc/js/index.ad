@@ -93,7 +93,7 @@ bridge.start();
 var template = camel.createProducerTemplate();
 var future = template.asyncRequestBody(endpoint, "hello");
 var response = template.extractFutureBody(future, Java.type("java.lang.String").class);
-// response == Haw are you ?
+// response == How are you ?
 
 ----
 
