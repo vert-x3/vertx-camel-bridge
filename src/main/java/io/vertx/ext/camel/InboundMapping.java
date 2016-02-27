@@ -26,6 +26,9 @@ import java.util.Objects;
  */
 public class InboundMapping extends CamelMapping {
 
+  /**
+   * The default value of the "publish" property. By default, the bridge uses {@code send}.
+   */
   public static final boolean DEFAULT_PUBLISH = false;
 
   private boolean publish = DEFAULT_PUBLISH;
@@ -89,8 +92,9 @@ public class InboundMapping extends CamelMapping {
   }
 
   /**
-   * Fluent version of {@link #setAddress(String)}
+   * Fluent version of {@link #setAddress(String)}.
    *
+   * @param address the Vert.x event bus address
    * @return the current {@link InboundMapping} instance
    * @see #setAddress(String)
    */

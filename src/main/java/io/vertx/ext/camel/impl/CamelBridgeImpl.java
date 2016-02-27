@@ -47,6 +47,12 @@ public class CamelBridgeImpl implements CamelBridge {
   private final Vertx vertx;
 
 
+  /**
+   * Creates an instance of the bridge.
+   *
+   * @param vertx   the Vert.x instance, must not be {@code null}
+   * @param options the bridge configuration, must not be {@code null}
+   */
   public CamelBridgeImpl(Vertx vertx, CamelBridgeOptions options) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(options);
@@ -76,10 +82,11 @@ public class CamelBridgeImpl implements CamelBridge {
       throw new IllegalStateException("The endpoint " + outbound.getUri() + " does not support producers", e);
     }
 
-    LOGGER.info("Creating Vert.x message consumer for " + outbound.getUri() + " receiving messages from " + outbound
-        .getAddress());
+    LOGGER.info("Creating Vert.x message consumer for " + outbound.getUri() + " receiving messages from "
+        + outbound.getAddress());
 
-    vertxConsumers.add(vertx.eventBus().consumer(outbound.getAddress(), new FromVertxToCamelProducer(producer, outbound)));
+    vertxConsumers.add(vertx.eventBus().consumer(outbound.getAddress(),
+        new FromVertxToCamelProducer(producer, outbound)));
   }
 
   private void createInboundBridge(Vertx vertx, InboundMapping inbound) {
@@ -89,7 +96,7 @@ public class CamelBridgeImpl implements CamelBridge {
       LOGGER.info("Creating camel consumer for " + inbound.getUri() + " sending messages to " + inbound.getAddress());
       camelConsumers.add(endpoint.createConsumer(new CamelToVertxProcessor(vertx, inbound)));
     } catch (Exception e) {
-      throw new IllegalStateException("The endpoint " + inbound.getUri() + " does not support consumers");
+      throw new IllegalStateException("The endpoint " + inbound.getUri() + " does not support consumers", e);
     }
   }
 

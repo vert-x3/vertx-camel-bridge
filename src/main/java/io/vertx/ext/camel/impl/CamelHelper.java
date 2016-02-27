@@ -27,6 +27,10 @@ import org.fusesource.hawtbuf.Buffer;
  */
 public class CamelHelper {
 
+  private CamelHelper() {
+    // Avoid direct instantiation.
+  }
+
   /**
    * Creates {@link DeliveryOptions} from the given {@code message}. It simply copies the headers if the {@code
    * headerCopy} parameter is set to {@code true}.

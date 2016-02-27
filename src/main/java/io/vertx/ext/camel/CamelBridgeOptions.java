@@ -36,6 +36,12 @@ public class CamelBridgeOptions {
 
   private final CamelContext context;
 
+  /**
+   * Creates a new instance of {@link CamelBridgeOptions}.
+   *
+   * @param context the camel context used by the bridge. Must not be {@code null}, may not be {@code started},
+   *                however it should be started when the bridge is started.
+   */
   public CamelBridgeOptions(CamelContext context) {
     Objects.requireNonNull(context);
     this.context = context;

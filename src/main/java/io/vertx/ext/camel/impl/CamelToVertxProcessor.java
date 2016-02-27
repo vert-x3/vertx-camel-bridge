@@ -33,6 +33,12 @@ public class CamelToVertxProcessor implements AsyncProcessor {
   private final Vertx vertx;
   private final InboundMapping inbound;
 
+  /**
+   * Creates a new instance of processor.
+   *
+   * @param vertx   the Vert.x instance, must not be {@code null}
+   * @param inbound the inbound mapping (configuration), must not be {@code null}
+   */
   public CamelToVertxProcessor(Vertx vertx, InboundMapping inbound) {
     this.vertx = vertx;
     this.inbound = inbound;
@@ -75,6 +81,7 @@ public class CamelToVertxProcessor implements AsyncProcessor {
         }
       }
     } catch (Throwable e) {
+      // Mark the exchange as "failed".
       exchange.setException(e);
     }
 

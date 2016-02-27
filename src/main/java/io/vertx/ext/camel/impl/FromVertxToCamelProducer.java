@@ -31,6 +31,12 @@ public class FromVertxToCamelProducer implements Handler<io.vertx.core.eventbus.
   private final AsyncProcessor producer;
   private final OutboundMapping outbound;
 
+  /**
+   * Creates a new instance of producer.
+   *
+   * @param producer the underlying producer, must not be {@code null}
+   * @param outbound the outbound configuration, must not be {@code null}
+   */
   public FromVertxToCamelProducer(Producer producer, OutboundMapping outbound) {
     this.endpoint = producer.getEndpoint();
     this.producer = AsyncProcessorConverterHelper.convert(producer);
