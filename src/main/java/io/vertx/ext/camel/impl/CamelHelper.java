@@ -25,7 +25,7 @@ import org.fusesource.hawtbuf.Buffer;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class CamelHelper {
+class CamelHelper {
 
   private CamelHelper() {
     // Avoid direct instantiation.
@@ -42,8 +42,11 @@ public class CamelHelper {
   static DeliveryOptions getDeliveryOptions(Message msg, boolean headerCopy) {
     DeliveryOptions delivery = new DeliveryOptions();
     if (headerCopy && msg.hasHeaders()) {
-      msg.getHeaders().entrySet().stream().forEach(entry ->
-          delivery.addHeader(entry.getKey(), entry.getValue().toString()));
+      msg.getHeaders().entrySet().stream().forEach(entry -> {
+        if (entry.getValue() != null) {
+          delivery.addHeader(entry.getKey(), entry.getValue().toString());
+        }
+      });
     }
     return delivery;
   }
