@@ -28,7 +28,7 @@ import static org.hamcrest.core.Is.is;
  */
 public class BridgeHelper {
 
-  public static void syncStart(CamelBridge bridge) {
+  public static void startBlocking(CamelBridge bridge) {
     AtomicReference<Boolean> spy = new AtomicReference<>();
     bridge.start(v -> {
       if (v.failed()) {
@@ -39,7 +39,7 @@ public class BridgeHelper {
     await().atMost(2, TimeUnit.SECONDS).untilAtomic(spy, is(true));
   }
 
-  public static void syncStop(CamelBridge bridge) {
+  public static void stopBlocking(CamelBridge bridge) {
     AtomicReference<Boolean> spy = new AtomicReference<>();
     bridge.stop(v -> {
       if (v.failed()) {

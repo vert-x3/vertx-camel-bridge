@@ -24,7 +24,6 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.camel.Expression;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
@@ -40,7 +39,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static com.jayway.awaitility.Awaitility.to;
 import static io.vertx.ext.camel.OutboundMapping.fromVertx;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
@@ -68,7 +66,7 @@ public class OutboundEndpointTest {
 
   @After
   public void tearDown(TestContext context) throws Exception {
-    BridgeHelper.syncStop(bridge);
+    BridgeHelper.stopBlocking(bridge);
     camel.stop();
     vertx.close(context.asyncAssertSuccess());
   }
@@ -82,7 +80,7 @@ public class OutboundEndpointTest {
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     vertx.eventBus().send("test", "hello");
 
@@ -104,7 +102,7 @@ public class OutboundEndpointTest {
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     vertx.eventBus().send("test", bytes);
 
@@ -123,7 +121,7 @@ public class OutboundEndpointTest {
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     vertx.eventBus().send("test", Buffer.buffer(bytes));
 
@@ -149,7 +147,7 @@ public class OutboundEndpointTest {
         .addOutboundMapping(fromVertx("test").toCamel("output").withoutHeadersCopy()));
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     vertx.eventBus().send("test", "hello", new DeliveryOptions().addHeader("key", "value"));
 
@@ -170,7 +168,7 @@ public class OutboundEndpointTest {
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     vertx.eventBus().send("test", "hello", new DeliveryOptions().addHeader("key", "value"));
 
@@ -191,7 +189,7 @@ public class OutboundEndpointTest {
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     vertx.eventBus().send("test", "hello");
     vertx.eventBus().send("test", "hello2");
@@ -209,7 +207,7 @@ public class OutboundEndpointTest {
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     vertx.eventBus().send("test", "hello");
     vertx.eventBus().send("test", "hello2");
@@ -231,7 +229,7 @@ public class OutboundEndpointTest {
     );
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     vertx.eventBus().publish("test", "hello");
     vertx.eventBus().publish("test", "hello2");
@@ -259,7 +257,7 @@ public class OutboundEndpointTest {
         .addOutboundMapping(fromVertx("test").toCamel("output")));
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     long date = System.currentTimeMillis();
     vertx.eventBus().send("test", date);
@@ -289,7 +287,7 @@ public class OutboundEndpointTest {
         .addOutboundMapping(fromVertx("test").toCamel("direct:start")));
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     Async async = context.async();
     vertx.eventBus().send("test", "hello", reply -> {
@@ -305,7 +303,7 @@ public class OutboundEndpointTest {
     vertx.createHttpServer().requestHandler(request -> {
       calledSpy.set(true);
       request.response().end("Alright");
-    }).listen(8080, ar -> {
+    }).listen(8081, ar -> {
       startedSpy.set(ar.succeeded());
     });
 
@@ -316,7 +314,7 @@ public class OutboundEndpointTest {
       public void configure() throws Exception {
         from("direct:my-route")
             .to("seda:next")
-            .to("http://localhost:8080");
+            .to("http://localhost:8081");
       }
     });
 
@@ -324,7 +322,7 @@ public class OutboundEndpointTest {
         .addOutboundMapping(fromVertx("camel-route").toCamel("direct:my-route")));
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     vertx.eventBus().send("camel-route", "hello");
 
@@ -339,7 +337,7 @@ public class OutboundEndpointTest {
       @Override
       public void configure() throws Exception {
         from("direct:my-route")
-            .to("http://localhost:8080");
+            .to("http://localhost:8081");
       }
     });
 
@@ -347,7 +345,7 @@ public class OutboundEndpointTest {
         .addOutboundMapping(fromVertx("camel-route").toCamel("direct:my-route")));
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     vertx.eventBus().send("camel-route", "hello", reply -> {
       calledSpy.set(reply.cause().getMessage());

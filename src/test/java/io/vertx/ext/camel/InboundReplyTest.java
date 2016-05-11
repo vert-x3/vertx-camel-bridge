@@ -79,7 +79,7 @@ public class InboundReplyTest {
     });
 
     camel.start();
-    BridgeHelper.syncStart(bridge);
+    BridgeHelper.startBlocking(bridge);
 
     ProducerTemplate template = camel.createProducerTemplate();
     Future<Object> future = template.asyncRequestBody(endpoint, "hello");

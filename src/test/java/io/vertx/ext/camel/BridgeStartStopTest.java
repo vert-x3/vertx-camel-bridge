@@ -32,7 +32,7 @@ import static io.vertx.ext.camel.InboundMapping.fromCamel;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @RunWith(VertxUnitRunner.class)
-public class BridgeStartStop {
+public class BridgeStartStopTest {
 
   private Vertx vertx;
   private DefaultCamelContext camel;
@@ -69,8 +69,8 @@ public class BridgeStartStop {
     bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addInboundMapping(fromCamel("direct:foo").toVertx("test")));
 
-    BridgeHelper.syncStart(bridge);
-    BridgeHelper.syncStop(bridge);
+    BridgeHelper.startBlocking(bridge);
+    BridgeHelper.stopBlocking(bridge);
   }
 
 }
