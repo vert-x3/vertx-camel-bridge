@@ -127,7 +127,7 @@
  *
  */
 @ModuleGen(name = "vertx-camel-bridge", groupPackage = "io.vertx.ext.camel")
-@Document(fileName = "index.ad")
+@Document(fileName = "index.adoc")
 package io.vertx.ext.camel;
 
 import io.vertx.codegen.annotations.ModuleGen;
