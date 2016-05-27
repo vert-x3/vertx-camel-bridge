@@ -54,30 +54,47 @@ public class CamelToVertxProcessor implements AsyncProcessor {
     Message in = exchange.getIn();
 
     Object body = CamelHelper.convert(inbound, in);
+
     DeliveryOptions delivery = CamelHelper.getDeliveryOptions(in, inbound.isHeadersCopy());
 
     try {
       if (inbound.isPublish()) {
-        vertx.eventBus().publish(inbound.getAddress(), body.toString(), delivery);
+        try {
+          vertx.eventBus().publish(inbound.getAddress(), body, delivery);
+        } catch (Exception e) {
+          // Mainly there to catch the missing codec exception
+          exchange.setException(e);
+        }
       } else {
         if (ExchangeHelper.isOutCapable(exchange)) {
-          vertx.eventBus().send(inbound.getAddress(), body.toString(), delivery, reply -> {
-            Message out = exchange.getOut();
-            if (reply.succeeded()) {
-              out.setBody(reply.result().body());
-              out.setHeaders(MultiMapHelper.toMap(reply.result().headers()));
-            } else {
-              exchange.setException(reply.cause());
-            }
-            // continue callback
-            callback.done(false);
-          });
+          try {
+            vertx.eventBus().send(inbound.getAddress(), body, delivery, reply -> {
+              Message out = exchange.getOut();
+              if (reply.succeeded()) {
+                out.setBody(reply.result().body());
+                out.setHeaders(MultiMapHelper.toMap(reply.result().headers()));
+              } else {
+                exchange.setException(reply.cause());
+              }
+              // continue callback
+              callback.done(false);
+            });
+          } catch (Exception e) {
+            // Mainly there to catch the missing codec exception
+            exchange.setException(e);
+          }
 
           // being routed async so return false
           return false;
         } else {
-          // No reply expected.
-          vertx.eventBus().send(inbound.getAddress(), body.toString(), delivery);
+          try {
+            // No reply expected.
+            vertx.eventBus().send(inbound.getAddress(), body, delivery);
+          } catch (Exception e) {
+            // Mainly there to catch the missing codec exception
+            exchange.setException(e);
+          }
+
         }
       }
     } catch (Throwable e) {

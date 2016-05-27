@@ -18,6 +18,7 @@ package io.vertx.ext.camel;
 import com.jayway.awaitility.Duration;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.stomp.StompClient;
 import io.vertx.ext.stomp.StompServer;
 import io.vertx.ext.stomp.StompServerHandler;
@@ -25,9 +26,11 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.camel.Endpoint;
+import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.support.SynchronizationAdapter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,6 +91,54 @@ public class InboundEndpointTest {
     ProducerTemplate producer = camel.createProducerTemplate();
     producer.asyncSendBody(endpoint, "hello");
   }
+
+  @Test
+  public void testWithDirectEndpointAndCustomType(TestContext context) throws Exception {
+    Async async = context.async();
+    Endpoint endpoint = camel.getEndpoint("direct:foo");
+
+    vertx.eventBus().registerDefaultCodec(Person.class, new PersonCodec());
+
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+        .addInboundMapping(fromCamel("direct:foo").toVertx("test")));
+
+    vertx.eventBus().<Person>consumer("test", message -> {
+      context.assertEquals("bob", message.body().getName());
+      async.complete();
+    });
+
+    camel.start();
+    BridgeHelper.startBlocking(bridge);
+
+    ProducerTemplate producer = camel.createProducerTemplate();
+    producer.asyncSendBody(endpoint, new Person().setName("bob"));
+  }
+
+  @Test
+  public void testWithDirectEndpointAndCustomTypeMissingCodec(TestContext context) throws Exception {
+    Async async = context.async();
+    Endpoint endpoint = camel.getEndpoint("direct:foo");
+
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+        .addInboundMapping(fromCamel("direct:foo").toVertx("test")));
+
+    camel.start();
+    BridgeHelper.startBlocking(bridge);
+
+    ProducerTemplate producer = camel.createProducerTemplate();
+    producer.asyncSend(endpoint, exchange -> {
+      Message message = exchange.getIn();
+      message.setBody(new Person().setName("bob"));
+      exchange.addOnCompletion(new SynchronizationAdapter() {
+        @Override
+        public void onFailure(Exchange exchange) {
+          context.assertTrue(exchange.getException().getMessage().contains("No message codec"));
+          async.complete();
+        }
+      });
+    });
+  }
+
 
   @Test
   public void testWithDirectEndpointWithHeaderCopy(TestContext context) throws Exception {
@@ -186,6 +237,60 @@ public class InboundEndpointTest {
   }
 
   @Test
+  public void testWithDirectEndpointWithPublishAndCustomType(TestContext context) throws Exception {
+    Async async = context.async();
+    Async async2 = context.async();
+    Endpoint endpoint = camel.getEndpoint("direct:foo");
+
+    vertx.eventBus().registerDefaultCodec(Person.class, new PersonCodec());
+
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+        .addInboundMapping(fromCamel(endpoint).toVertx("test").usePublish()));
+
+    vertx.eventBus().<Person>consumer("test", message -> {
+      context.assertEquals("bob", message.body().getName());
+      async.complete();
+    });
+
+    vertx.eventBus().<Person>consumer("test", message -> {
+      context.assertEquals("bob", message.body().getName());
+      async2.complete();
+    });
+
+    camel.start();
+    BridgeHelper.startBlocking(bridge);
+
+    ProducerTemplate producer = camel.createProducerTemplate();
+    producer.asyncSendBody(endpoint, new Person().setName("bob"));
+  }
+
+  @Test
+  public void testWithDirectEndpointWithPublishAndCustomTypeNoCodec(TestContext context) throws Exception {
+    Async async = context.async();
+    Endpoint endpoint = camel.getEndpoint("direct:foo");
+
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+        .addInboundMapping(fromCamel(endpoint).toVertx("test").usePublish()));
+
+
+    camel.start();
+    BridgeHelper.startBlocking(bridge);
+
+    ProducerTemplate producer = camel.createProducerTemplate();
+    producer.asyncSend(endpoint, exchange -> {
+      Message message = exchange.getIn();
+      message.setBody(new Person().setName("bob"));
+      exchange.addOnCompletion(new SynchronizationAdapter() {
+        @Override
+        public void onFailure(Exchange exchange) {
+          context.assertTrue(exchange.getException().getMessage().contains("No message codec"));
+          async.complete();
+        }
+      });
+    });
+  }
+
+  @Test
   public void testWithStomp(TestContext context) throws Exception {
     StompServerHandler serverHandler = StompServerHandler.create(vertx);
     StompServer.create(vertx).handler(serverHandler).listen(ar -> {
@@ -200,7 +305,8 @@ public class InboundEndpointTest {
         .addInboundMapping(fromCamel(endpoint).toVertx("test")));
 
     vertx.eventBus().consumer("test", message -> {
-      context.assertEquals("hello", message.body());
+      // We get a buffer.
+      context.assertEquals("hello", message.body().toString());
       async.complete();
     });
 
@@ -210,6 +316,37 @@ public class InboundEndpointTest {
     StompClient.create(vertx).connect(connection -> {
       // /queue, don't ask why they added a /
       connection.result().send("/queue", Buffer.buffer("hello"));
+      connection.result().close();
+    });
+  }
+
+  @Test
+  public void testWithStompAndJson(TestContext context) throws Exception {
+    StompServerHandler serverHandler = StompServerHandler.create(vertx);
+    StompServer.create(vertx).handler(serverHandler).listen(ar -> {
+      stomp = ar.result();
+    });
+    await().atMost(DEFAULT_TIMEOUT).until(() -> stomp != null);
+
+    Async async = context.async();
+    Endpoint endpoint = camel.getEndpoint("stomp:queue");
+
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+        .addInboundMapping(fromCamel(endpoint).toVertx("test")));
+
+    vertx.eventBus().<Buffer>consumer("test", message -> {
+      // We get a buffer.
+      JsonObject json = message.body().toJsonObject();
+      context.assertEquals("bar", json.getString("foo"));
+      async.complete();
+    });
+
+    camel.start();
+    BridgeHelper.startBlocking(bridge);
+
+    StompClient.create(vertx).connect(connection -> {
+      // /queue, don't ask why they added a /
+      connection.result().send("/queue", Buffer.buffer(new JsonObject().put("foo", "bar").encode()));
       connection.result().close();
     });
   }

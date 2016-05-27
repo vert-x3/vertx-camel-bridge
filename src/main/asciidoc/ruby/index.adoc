@@ -157,3 +157,4 @@ vertx.event_bus().send("camel-route", "hello") { |reply_err,reply|
 
 Don't forget to stop the bridge using the `stop` method. The `stop` method is asynchronous. You can use
 `link:unavailable#stop-instance_method[stop]` to be notified when the bridge has been stopped.
+

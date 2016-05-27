@@ -186,3 +186,13 @@ vertx.eventBus().send("camel-route", "hello", reply -> {
 
 Don't forget to stop the bridge using the `stop` method. The `stop` method is asynchronous. You can use
 `link:../../apidocs/io/vertx/ext/camel/CamelBridge.html#stop-io.vertx.core.Handler-[stop]` to be notified when the bridge has been stopped.
+
+== Exchanging custom object
+
+If you want to send and receive custom objects, you need to register a codec on the event bus:
+
+[source,java]
+----
+vertx.eventBus().registerDefaultCodec(Person.class, codec);
+----
+

@@ -125,6 +125,20 @@
  * Don't forget to stop the bridge using the `stop` method. The `stop` method is asynchronous. You can use
  * {@link io.vertx.ext.camel.CamelBridge#stop(io.vertx.core.Handler)} to be notified when the bridge has been stopped.
  *
+ * [language, java]
+ * ----
+ * == Exchanging custom object
+ *
+ * If you want to send and receive custom objects, you need to register a codec on the event bus:
+ *
+ * [source,$lang]
+ * \----
+ * {@link examples.Examples#registerCodec(io.vertx.core.Vertx, io.vertx.core.eventbus.MessageCodec)}
+ * \----
+ *
+ * ----
+ *
+ *
  */
 @ModuleGen(name = "vertx-camel-bridge", groupPackage = "io.vertx.ext.camel")
 @Document(fileName = "index.adoc")
