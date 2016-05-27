@@ -59,42 +59,25 @@ public class CamelToVertxProcessor implements AsyncProcessor {
 
     try {
       if (inbound.isPublish()) {
-        try {
-          vertx.eventBus().publish(inbound.getAddress(), body, delivery);
-        } catch (Exception e) {
-          // Mainly there to catch the missing codec exception
-          exchange.setException(e);
-        }
+        vertx.eventBus().publish(inbound.getAddress(), body, delivery);
       } else {
         if (ExchangeHelper.isOutCapable(exchange)) {
-          try {
-            vertx.eventBus().send(inbound.getAddress(), body, delivery, reply -> {
-              Message out = exchange.getOut();
-              if (reply.succeeded()) {
-                out.setBody(reply.result().body());
-                out.setHeaders(MultiMapHelper.toMap(reply.result().headers()));
-              } else {
-                exchange.setException(reply.cause());
-              }
-              // continue callback
-              callback.done(false);
-            });
-          } catch (Exception e) {
-            // Mainly there to catch the missing codec exception
-            exchange.setException(e);
-          }
-
+          vertx.eventBus().send(inbound.getAddress(), body, delivery, reply -> {
+            Message out = exchange.getOut();
+            if (reply.succeeded()) {
+              out.setBody(reply.result().body());
+              out.setHeaders(MultiMapHelper.toMap(reply.result().headers()));
+            } else {
+              exchange.setException(reply.cause());
+            }
+            // continue callback
+            callback.done(false);
+          });
           // being routed async so return false
           return false;
         } else {
-          try {
-            // No reply expected.
-            vertx.eventBus().send(inbound.getAddress(), body, delivery);
-          } catch (Exception e) {
-            // Mainly there to catch the missing codec exception
-            exchange.setException(e);
-          }
-
+          // No reply expected.
+          vertx.eventBus().send(inbound.getAddress(), body, delivery);
         }
       }
     } catch (Throwable e) {
