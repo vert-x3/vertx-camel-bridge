@@ -157,3 +157,4 @@ vertx.eventBus().send("camel-route", "hello", function (reply, reply_err) {
 
 Don't forget to stop the bridge using the `stop` method. The `stop` method is asynchronous. You can use
 `stop` to be notified when the bridge has been stopped.
+

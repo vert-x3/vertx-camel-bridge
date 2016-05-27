@@ -54,14 +54,15 @@ public class CamelToVertxProcessor implements AsyncProcessor {
     Message in = exchange.getIn();
 
     Object body = CamelHelper.convert(inbound, in);
+
     DeliveryOptions delivery = CamelHelper.getDeliveryOptions(in, inbound.isHeadersCopy());
 
     try {
       if (inbound.isPublish()) {
-        vertx.eventBus().publish(inbound.getAddress(), body.toString(), delivery);
+        vertx.eventBus().publish(inbound.getAddress(), body, delivery);
       } else {
         if (ExchangeHelper.isOutCapable(exchange)) {
-          vertx.eventBus().send(inbound.getAddress(), body.toString(), delivery, reply -> {
+          vertx.eventBus().send(inbound.getAddress(), body, delivery, reply -> {
             Message out = exchange.getOut();
             if (reply.succeeded()) {
               out.setBody(reply.result().body());
@@ -72,12 +73,11 @@ public class CamelToVertxProcessor implements AsyncProcessor {
             // continue callback
             callback.done(false);
           });
-
           // being routed async so return false
           return false;
         } else {
           // No reply expected.
-          vertx.eventBus().send(inbound.getAddress(), body.toString(), delivery);
+          vertx.eventBus().send(inbound.getAddress(), body, delivery);
         }
       }
     } catch (Throwable e) {

@@ -16,6 +16,7 @@
 package examples;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.MessageCodec;
 import io.vertx.ext.camel.CamelBridge;
 import io.vertx.ext.camel.CamelBridgeOptions;
 import io.vertx.ext.camel.InboundMapping;
@@ -135,5 +136,13 @@ public class Examples {
     Future<Object> future = template.asyncRequestBody(endpoint, "hello");
     String response = template.extractFutureBody(future, String.class);
     // response == How are you ?
+  }
+
+  public void registerCodec(Vertx vertx, MessageCodec<Person, Person> codec) {
+    vertx.eventBus().registerDefaultCodec(Person.class, codec);
+  }
+
+  private class Person {
+
   }
 }

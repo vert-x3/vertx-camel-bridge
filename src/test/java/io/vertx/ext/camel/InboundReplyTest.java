@@ -45,10 +45,9 @@ public class InboundReplyTest {
   private Vertx vertx;
   private DefaultCamelContext camel;
 
-  private StompServer stomp;
+
   private CamelBridge bridge;
 
-  //TODO Test with route
 
   @Before
   public void setUp(TestContext context) {
@@ -60,10 +59,6 @@ public class InboundReplyTest {
   public void tearDown(TestContext context) throws Exception {
     bridge.stop();
     camel.stop();
-    if (stomp != null) {
-      stomp.close(context.asyncAssertSuccess());
-    }
-
     vertx.close(context.asyncAssertSuccess());
   }
 
@@ -85,6 +80,28 @@ public class InboundReplyTest {
     Future<Object> future = template.asyncRequestBody(endpoint, "hello");
     String response = template.extractFutureBody(future, String.class);
     assertThat(response).isEqualTo("How are you ?");
+  }
+
+  @Test
+  public void testReplyWithCustomType() throws Exception {
+    Endpoint endpoint = camel.getEndpoint("direct:stuff");
+
+    vertx.eventBus().registerDefaultCodec(Person.class, new PersonCodec());
+
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+        .addInboundMapping(new InboundMapping().setAddress("test-reply").setEndpoint(endpoint)));
+
+    vertx.eventBus().consumer("test-reply", message -> {
+      message.reply(new Person().setName("alice"));
+    });
+
+    camel.start();
+    BridgeHelper.startBlocking(bridge);
+
+    ProducerTemplate template = camel.createProducerTemplate();
+    Future<Object> future = template.asyncRequestBody(endpoint, new Person().setName("bob"));
+    Person response = template.extractFutureBody(future, Person.class);
+    assertThat(response.getName()).isEqualTo("alice");
   }
 
 
