@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.camel;
+package io.vertx.camel;
 
 import io.vertx.core.Vertx;
 import io.vertx.ext.unit.TestContext;
@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static io.vertx.ext.camel.InboundMapping.fromCamel;
+import static io.vertx.camel.InboundMapping.fromCamel;
 
 /**
  * Check start-stop sequences.

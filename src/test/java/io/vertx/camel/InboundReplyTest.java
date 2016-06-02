@@ -13,11 +13,10 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.camel;
+package io.vertx.camel;
 
 import com.jayway.awaitility.Duration;
 import io.vertx.core.Vertx;
-import io.vertx.ext.stomp.StompServer;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.camel.Endpoint;

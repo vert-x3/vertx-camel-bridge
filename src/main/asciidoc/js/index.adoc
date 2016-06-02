@@ -11,6 +11,8 @@ This bridge lets Vert.x applications interact with Camel endpoints:
 
 The bridge relies on the Vert.x event bus and associate an event bus address to a Camel endpoint.
 
+CAUTION: This component is not _polyglot_ as it requires some classes from Camel that can only be used in Java.
+
 == Using vertx-camel-bridge
 
 To use the Vert.x Camel Bridge, add the following dependency to the _dependencies_ section of your
@@ -41,7 +43,7 @@ Before being used, the bridge needs to be configured and started:
 [source,js]
 ----
 var camel = new (Java.type("org.apache.camel.impl.DefaultCamelContext"))();
-Java.type("io.vertx.ext.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.ext.camel.CamelBridgeOptions"))(camel).addInboundMapping(Java.type("io.vertx.ext.camel.InboundMapping").fromCamel("direct:stuff").toVertx("eventbus-address")).addOutboundMapping(Java.type("io.vertx.ext.camel.OutboundMapping").fromVertx("eventbus-address").toCamel("stream:out"))).start();
+Java.type("io.vertx.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.camel.CamelBridgeOptions"))(camel).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel("direct:stuff").toVertx("eventbus-address")).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("eventbus-address").toCamel("stream:out"))).start();
 
 ----
 
@@ -60,7 +62,7 @@ transformed to event bus messages.
 ----
 var endpoint = camel.getEndpoint("direct:foo");
 
-Java.type("io.vertx.ext.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.ext.camel.CamelBridgeOptions"))(camel).addInboundMapping(Java.type("io.vertx.ext.camel.InboundMapping").fromCamel("direct:stuff").toVertx("eventbus-address")).addInboundMapping(Java.type("io.vertx.ext.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address")).addInboundMapping(Java.type("io.vertx.ext.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address").withoutHeadersCopy()).addInboundMapping(Java.type("io.vertx.ext.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address").usePublish()).addInboundMapping(Java.type("io.vertx.ext.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address").withBodyType(Java.type("java.lang.String").class)));
+Java.type("io.vertx.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.camel.CamelBridgeOptions"))(camel).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel("direct:stuff").toVertx("eventbus-address")).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address")).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address").withoutHeadersCopy()).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address").usePublish()).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address").withBodyType(Java.type("java.lang.String").class)));
 
 ----
 
@@ -81,7 +83,7 @@ code expect as reply to the sent message. When the reply arrives it is propagate
 ----
 var endpoint = camel.getEndpoint("direct:stuff");
 
-var bridge = Java.type("io.vertx.ext.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.ext.camel.CamelBridgeOptions"))(camel).addInboundMapping(new (Java.type("io.vertx.ext.camel.InboundMapping"))().setAddress("test-reply").setEndpoint(endpoint)));
+var bridge = Java.type("io.vertx.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.camel.CamelBridgeOptions"))(camel).addInboundMapping(new (Java.type("io.vertx.camel.InboundMapping"))().setAddress("test-reply").setEndpoint(endpoint)));
 
 vertx.eventBus().consumer("with-reply", function (message) {
   message.reply("How are you ?");
@@ -106,7 +108,7 @@ are transformed to Camel messages and sent to the endpoint.
 ----
 var endpoint = camel.getEndpoint("stream:out");
 
-Java.type("io.vertx.ext.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.ext.camel.CamelBridgeOptions"))(camel).addOutboundMapping(Java.type("io.vertx.ext.camel.OutboundMapping").fromVertx("eventbus-address").toCamel("stream:out")).addOutboundMapping(Java.type("io.vertx.ext.camel.OutboundMapping").fromVertx("eventbus-address").toCamel(endpoint)).addOutboundMapping(Java.type("io.vertx.ext.camel.OutboundMapping").fromVertx("eventbus-address").toCamel(endpoint).withoutHeadersCopy()).addOutboundMapping(Java.type("io.vertx.ext.camel.OutboundMapping").fromVertx("eventbus-address").toCamel(endpoint)));
+Java.type("io.vertx.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.camel.CamelBridgeOptions"))(camel).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("eventbus-address").toCamel("stream:out")).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("eventbus-address").toCamel(endpoint)).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("eventbus-address").toCamel(endpoint).withoutHeadersCopy()).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("eventbus-address").toCamel(endpoint)));
 
 ----
 
@@ -118,7 +120,7 @@ You can connect your outbound mapping to a Camel route:
 ----
 camel.addRoutes(new (Java.type("org.apache.camel.builder.RouteBuilder"))());
 
-var bridge = Java.type("io.vertx.ext.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.ext.camel.CamelBridgeOptions"))(camel).addOutboundMapping(Java.type("io.vertx.ext.camel.OutboundMapping").fromVertx("test").toCamel("direct:start")));
+var bridge = Java.type("io.vertx.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.camel.CamelBridgeOptions"))(camel).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("test").toCamel("direct:start")));
 
 camel.start();
 bridge.start();
@@ -138,7 +140,7 @@ route fails, you get a reply failure (recipient failure), with the message as ca
 ----
 camel.addRoutes(new (Java.type("org.apache.camel.builder.RouteBuilder"))());
 
-var bridge = Java.type("io.vertx.ext.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.ext.camel.CamelBridgeOptions"))(camel).addOutboundMapping(Java.type("io.vertx.ext.camel.OutboundMapping").fromVertx("camel-route").toCamel("direct:my-route")));
+var bridge = Java.type("io.vertx.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.camel.CamelBridgeOptions"))(camel).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("camel-route").toCamel("direct:my-route")));
 
 camel.start();
 bridge.start();

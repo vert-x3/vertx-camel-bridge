@@ -1,4 +1,4 @@
-package io.vertx.ext.camel.impl;
+package io.vertx.camel.impl;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import org.apache.camel.Message;

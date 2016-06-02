@@ -11,6 +11,8 @@ This bridge lets Vert.x applications interact with Camel endpoints:
 
 The bridge relies on the Vert.x event bus and associate an event bus address to a Camel endpoint.
 
+CAUTION: This component is not _polyglot_ as it requires some classes from Camel that can only be used in Java.
+
 == Using vertx-camel-bridge
 
 To use the Vert.x Camel Bridge, add the following dependency to the _dependencies_ section of your
@@ -50,7 +52,7 @@ CamelBridge.create(vertx,
 
 The bridge requires a `CamelContext`. It will find the endpoint from the context. The bridge needs to be started
 before being used. Be aware the the `start` method is asynchronous. You can use
-`link:../../apidocs/io/vertx/ext/camel/CamelBridge.html#start-io.vertx.core.Handler-[start]` to be notified when the bridge has been started.
+`link:../../apidocs/io/vertx/camel/CamelBridge.html#start-io.vertx.core.Handler-[start]` to be notified when the bridge has been started.
 
 
 
@@ -185,7 +187,7 @@ vertx.eventBus().send("camel-route", "hello", reply -> {
 == Stopping the bridge
 
 Don't forget to stop the bridge using the `stop` method. The `stop` method is asynchronous. You can use
-`link:../../apidocs/io/vertx/ext/camel/CamelBridge.html#stop-io.vertx.core.Handler-[stop]` to be notified when the bridge has been stopped.
+`link:../../apidocs/io/vertx/camel/CamelBridge.html#stop-io.vertx.core.Handler-[stop]` to be notified when the bridge has been stopped.
 
 == Exchanging custom object
 

@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.camel;
+package io.vertx.camel;
 
 import com.jayway.awaitility.Duration;
 import io.vertx.core.Vertx;
@@ -37,7 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static io.vertx.ext.camel.InboundMapping.fromCamel;
+import static io.vertx.camel.InboundMapping.fromCamel;
 
 /**
  * Tests that Camel exchanges are propagated to the event bus

@@ -1,4 +1,4 @@
-package io.vertx.ext.camel;
+package io.vertx.camel;
 
 /**
  * Just some dummy object.

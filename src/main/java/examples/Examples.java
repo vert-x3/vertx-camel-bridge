@@ -17,10 +17,10 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageCodec;
-import io.vertx.ext.camel.CamelBridge;
-import io.vertx.ext.camel.CamelBridgeOptions;
-import io.vertx.ext.camel.InboundMapping;
-import io.vertx.ext.camel.OutboundMapping;
+import io.vertx.camel.CamelBridge;
+import io.vertx.camel.CamelBridgeOptions;
+import io.vertx.camel.InboundMapping;
+import io.vertx.camel.OutboundMapping;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.ProducerTemplate;

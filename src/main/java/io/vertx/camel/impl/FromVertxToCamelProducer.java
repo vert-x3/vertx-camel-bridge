@@ -13,12 +13,12 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.camel.impl;
+package io.vertx.camel.impl;
 
+import io.vertx.camel.OutboundMapping;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.ReplyFailure;
-import io.vertx.ext.camel.OutboundMapping;
 import org.apache.camel.*;
 import org.apache.camel.util.AsyncProcessorConverterHelper;
 

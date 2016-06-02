@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.camel;
+package io.vertx.camel;
 
 import com.jayway.awaitility.Duration;
 import io.vertx.core.Vertx;
@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static io.vertx.ext.camel.OutboundMapping.fromVertx;
+import static io.vertx.camel.OutboundMapping.fromVertx;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
 import static org.hamcrest.CoreMatchers.is;

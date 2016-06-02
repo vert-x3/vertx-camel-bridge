@@ -13,7 +13,7 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.camel.impl;
+package io.vertx.camel.impl;
 
 import io.vertx.core.MultiMap;
 import org.junit.Test;

@@ -11,6 +11,8 @@ This bridge lets Vert.x applications interact with Camel endpoints:
 
 The bridge relies on the Vert.x event bus and associate an event bus address to a Camel endpoint.
 
+CAUTION: This component is not _polyglot_ as it requires some classes from Camel that can only be used in Java.
+
 == Using vertx-camel-bridge
 
 To use the Vert.x Camel Bridge, add the following dependency to the _dependencies_ section of your
@@ -41,7 +43,7 @@ Before being used, the bridge needs to be configured and started:
 [source,ruby]
 ----
 camel = Java::OrgApacheCamelImpl::DefaultCamelContext.new()
-Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel("direct:stuff").to_vertx("eventbus-address")).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("eventbus-address").to_camel("stream:out"))).start()
+Java::IoVertxCamel::CamelBridge.create(vertx, Java::IoVertxCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxCamel::InboundMapping.from_camel("direct:stuff").to_vertx("eventbus-address")).add_outbound_mapping(Java::IoVertxCamel::OutboundMapping.from_vertx("eventbus-address").to_camel("stream:out"))).start()
 
 ----
 
@@ -60,7 +62,7 @@ transformed to event bus messages.
 ----
 endpoint = camel.get_endpoint("direct:foo")
 
-Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel("direct:stuff").to_vertx("eventbus-address")).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address")).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address").without_headers_copy()).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address").use_publish()).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address").with_body_type(Java::JavaLang::String::class)))
+Java::IoVertxCamel::CamelBridge.create(vertx, Java::IoVertxCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxCamel::InboundMapping.from_camel("direct:stuff").to_vertx("eventbus-address")).add_inbound_mapping(Java::IoVertxCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address")).add_inbound_mapping(Java::IoVertxCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address").without_headers_copy()).add_inbound_mapping(Java::IoVertxCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address").use_publish()).add_inbound_mapping(Java::IoVertxCamel::InboundMapping.from_camel(endpoint).to_vertx("eventbus-address").with_body_type(Java::JavaLang::String::class)))
 
 ----
 
@@ -81,7 +83,7 @@ code expect as reply to the sent message. When the reply arrives it is propagate
 ----
 endpoint = camel.get_endpoint("direct:stuff")
 
-bridge = Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxExtCamel::InboundMapping.new().set_address("test-reply").set_endpoint(endpoint)))
+bridge = Java::IoVertxCamel::CamelBridge.create(vertx, Java::IoVertxCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxCamel::InboundMapping.new().set_address("test-reply").set_endpoint(endpoint)))
 
 vertx.event_bus().consumer("with-reply") { |message|
   message.reply("How are you ?")
@@ -106,7 +108,7 @@ are transformed to Camel messages and sent to the endpoint.
 ----
 endpoint = camel.get_endpoint("stream:out")
 
-Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("eventbus-address").to_camel("stream:out")).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("eventbus-address").to_camel(endpoint)).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("eventbus-address").to_camel(endpoint).without_headers_copy()).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("eventbus-address").to_camel(endpoint)))
+Java::IoVertxCamel::CamelBridge.create(vertx, Java::IoVertxCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxCamel::OutboundMapping.from_vertx("eventbus-address").to_camel("stream:out")).add_outbound_mapping(Java::IoVertxCamel::OutboundMapping.from_vertx("eventbus-address").to_camel(endpoint)).add_outbound_mapping(Java::IoVertxCamel::OutboundMapping.from_vertx("eventbus-address").to_camel(endpoint).without_headers_copy()).add_outbound_mapping(Java::IoVertxCamel::OutboundMapping.from_vertx("eventbus-address").to_camel(endpoint)))
 
 ----
 
@@ -118,7 +120,7 @@ You can connect your outbound mapping to a Camel route:
 ----
 camel.add_routes(Java::OrgApacheCamelBuilder::RouteBuilder.new())
 
-bridge = Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("test").to_camel("direct:start")))
+bridge = Java::IoVertxCamel::CamelBridge.create(vertx, Java::IoVertxCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxCamel::OutboundMapping.from_vertx("test").to_camel("direct:start")))
 
 camel.start()
 bridge.start()
@@ -138,7 +140,7 @@ route fails, you get a reply failure (recipient failure), with the message as ca
 ----
 camel.add_routes(Java::OrgApacheCamelBuilder::RouteBuilder.new())
 
-bridge = Java::IoVertxExtCamel::CamelBridge.create(vertx, Java::IoVertxExtCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxExtCamel::OutboundMapping.from_vertx("camel-route").to_camel("direct:my-route")))
+bridge = Java::IoVertxCamel::CamelBridge.create(vertx, Java::IoVertxCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxCamel::OutboundMapping.from_vertx("camel-route").to_camel("direct:my-route")))
 
 camel.start()
 bridge.start()

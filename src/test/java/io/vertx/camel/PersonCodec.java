@@ -1,4 +1,4 @@
-package io.vertx.ext.camel;
+package io.vertx.camel;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;

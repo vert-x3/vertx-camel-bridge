@@ -13,15 +13,15 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.camel.impl;
+package io.vertx.camel.impl;
 
+import io.vertx.camel.*;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.camel.*;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;
@@ -115,7 +115,7 @@ public class CamelBridgeImpl implements CamelBridge {
 
   @Override
   public CamelBridge start(Handler<AsyncResult<Void>> completed) {
-    vertx.<Void>executeBlocking(
+    vertx.executeBlocking(
         future -> {
           camelConsumers.stream().forEach(c -> {
             try {
@@ -145,7 +145,7 @@ public class CamelBridgeImpl implements CamelBridge {
 
   @Override
   public CamelBridge stop(Handler<AsyncResult<Void>> completed) {
-    vertx.<Void>executeBlocking(
+    vertx.executeBlocking(
         future -> {
           camelConsumers.stream().forEach(c -> {
             try {

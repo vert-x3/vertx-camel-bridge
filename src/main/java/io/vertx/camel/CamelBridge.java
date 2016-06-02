@@ -13,12 +13,12 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.camel;
+package io.vertx.camel;
 
+import io.vertx.camel.impl.CamelBridgeImpl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.ext.camel.impl.CamelBridgeImpl;
 
 /**
  * Camel Bridge facade.

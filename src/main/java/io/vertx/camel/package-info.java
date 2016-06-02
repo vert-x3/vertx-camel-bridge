@@ -26,6 +26,8 @@
  *
  * The bridge relies on the Vert.x event bus and associate an event bus address to a Camel endpoint.
  *
+ * CAUTION: This component is not _polyglot_ as it requires some classes from Camel that can only be used in Java.
+ *
  * == Using vertx-camel-bridge
  *
  * To use the Vert.x Camel Bridge, add the following dependency to the _dependencies_ section of your
@@ -60,7 +62,7 @@
  *
  * The bridge requires a `CamelContext`. It will find the endpoint from the context. The bridge needs to be started
  * before being used. Be aware the the `start` method is asynchronous. You can use
- * {@link io.vertx.ext.camel.CamelBridge#start(io.vertx.core.Handler)} to be notified when the bridge has been started.
+ * {@link io.vertx.camel.CamelBridge#start(io.vertx.core.Handler)} to be notified when the bridge has been started.
  *
  *
  *
@@ -123,7 +125,7 @@
  * == Stopping the bridge
  *
  * Don't forget to stop the bridge using the `stop` method. The `stop` method is asynchronous. You can use
- * {@link io.vertx.ext.camel.CamelBridge#stop(io.vertx.core.Handler)} to be notified when the bridge has been stopped.
+ * {@link io.vertx.camel.CamelBridge#stop(io.vertx.core.Handler)} to be notified when the bridge has been stopped.
  *
  * [language, java]
  * ----
@@ -140,9 +142,9 @@
  *
  *
  */
-@ModuleGen(name = "vertx-camel-bridge", groupPackage = "io.vertx.ext.camel")
+@ModuleGen(name = "vertx-camel-bridge", groupPackage = "io.vertx")
 @Document(fileName = "index.adoc")
-package io.vertx.ext.camel;
+package io.vertx.camel;
 
 import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.docgen.Document;
