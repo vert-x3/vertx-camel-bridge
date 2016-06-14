@@ -25,7 +25,7 @@ build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-camel-bridge</artifactId>
-  <version>3.3.0-SNAPSHOT</version>
+  <version>3.3.0.CR2</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-camel-bridge:3.3.0-SNAPSHOT'
+compile 'io.vertx:vertx-camel-bridge:3.3.0.CR2'
 ----
 
 == Bridge configuration
@@ -74,7 +74,7 @@ The snippet above shows different ways to configure an inbound mapping:
 * you can configures the type of the event bus message body. If not set it uses the Camel message payload. If
 sets, it looks in the Camel context for a converter between the Camel message payload and the desired type.
 
-_Note_: `org.fusesource.hawtbuf.Buffer` are automatically converted to `link:../../jsdoc/buffer-Buffer.html[Buffer]`.
+_Note_: `org.fusesource.hawtbuf.Buffer` are automatically converted to `link:../../jsdoc/module-vertx-js_buffer-Buffer.html[Buffer]`.
 
 If `send` is used (so not `publish`), and when the Camel exchange expect a reply (_In Out_ exchange), the Vert.x
 code expect as reply to the sent message. When the reply arrives it is propagated to the exchange:
