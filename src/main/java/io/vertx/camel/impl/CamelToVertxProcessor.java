@@ -66,7 +66,7 @@ public class CamelToVertxProcessor implements AsyncProcessor {
             Message out = exchange.getOut();
             if (reply.succeeded()) {
               out.setBody(reply.result().body());
-              out.setHeaders(MultiMapHelper.toMap(reply.result().headers()));
+              MultiMapHelper.toMap(reply.result().headers(), in.getHeaders());
             } else {
               exchange.setException(reply.cause());
             }

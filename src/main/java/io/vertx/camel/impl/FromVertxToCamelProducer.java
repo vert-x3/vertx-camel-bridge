@@ -51,7 +51,7 @@ public class FromVertxToCamelProducer implements Handler<io.vertx.core.eventbus.
     Message in = exchange.getIn();
     in.setBody(vertxMessage.body());
     if (outbound.isHeadersCopy()) {
-      in.setHeaders(MultiMapHelper.toMap(vertxMessage.headers()));
+      MultiMapHelper.toMap(vertxMessage.headers(), in.getHeaders());
     }
 
     // It's an async producer so won't block.

@@ -15,11 +15,11 @@
  */
 package io.vertx.camel.impl;
 
-import io.vertx.core.MultiMap;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.vertx.core.MultiMap;
 
 /**
  * A helper class to transform multi-maps into maps
@@ -37,7 +37,19 @@ public class MultiMapHelper {
    * @return the created map
    */
   public static Map<String, Object> toMap(MultiMap multiMap) {
-    Map<String, Object> map = new LinkedHashMap<>();
+    return toMap(multiMap, new LinkedHashMap<>());
+  }
+
+  /**
+   * Transforms the given multimap to a map.
+   * Scalar entries are put as they are in the resulting map.
+   * Multiple entries are put a list in the resulting map.
+   *
+   * @param multiMap the multi-map, must not be {@code null}
+   * @param map the destination map {@code null}
+   * @return the map
+   */
+  public static Map<String, Object> toMap(MultiMap multiMap, Map<String, Object> map) {
     multiMap.names().stream().forEach(key -> {
       List<String> list = multiMap.getAll(key);
       map.put(key, list.size() == 1 ? list.get(0) : list);
