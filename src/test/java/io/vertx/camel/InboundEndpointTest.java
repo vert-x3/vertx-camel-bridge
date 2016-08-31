@@ -62,14 +62,14 @@ public class InboundEndpointTest {
   }
 
   @After
-  public void tearDown(TestContext context) throws Exception {
+  public void tearDown(TestContext tc) throws Exception {
     BridgeHelper.stopBlocking(bridge);
     camel.stop();
-    if (stomp != null) {
-      stomp.close(context.asyncAssertSuccess());
-    }
 
-    vertx.close(context.asyncAssertSuccess());
+    if (stomp != null) {
+      stomp.close(null);
+    }
+    vertx.close(tc.asyncAssertSuccess());
   }
 
   @Test
