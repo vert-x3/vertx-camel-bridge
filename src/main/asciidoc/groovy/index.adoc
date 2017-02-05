@@ -25,7 +25,7 @@ build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-camel-bridge</artifactId>
-  <version>3.3.3</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-camel-bridge:3.3.3'
+compile 'io.vertx:vertx-camel-bridge:3.4.0-SNAPSHOT'
 ----
 
 == Bridge configuration
@@ -49,7 +49,7 @@ io.vertx.camel.CamelBridge.create(vertx, new io.vertx.camel.CamelBridgeOptions(c
 
 The bridge requires a `CamelContext`. It will find the endpoint from the context. The bridge needs to be started
 before being used. Be aware the the `start` method is asynchronous. You can use
-`start` to be notified when the bridge has been started.
+`link:../../apidocs/io/vertx/camel/CamelBridge.html#start-io.vertx.core.Handler-[start]` to be notified when the bridge has been started.
 
 
 
@@ -74,29 +74,14 @@ The snippet above shows different ways to configure an inbound mapping:
 * you can configures the type of the event bus message body. If not set it uses the Camel message payload. If
 sets, it looks in the Camel context for a converter between the Camel message payload and the desired type.
 
-_Note_: `org.fusesource.hawtbuf.Buffer` are automatically converted to `link:../../groovydoc/io/vertx/groovy/core/buffer/Buffer.html[Buffer]`.
+_Note_: `org.fusesource.hawtbuf.Buffer` are automatically converted to `link:../../apidocs/io/vertx/core/buffer/Buffer.html[Buffer]`.
 
 If `send` is used (so not `publish`), and when the Camel exchange expect a reply (_In Out_ exchange), the Vert.x
 code expect as reply to the sent message. When the reply arrives it is propagated to the exchange:
 
 [source,groovy]
 ----
-def endpoint = camel.getEndpoint("direct:stuff")
-
-def bridge = io.vertx.camel.CamelBridge.create(vertx, new io.vertx.camel.CamelBridgeOptions(camel).addInboundMapping(new io.vertx.camel.InboundMapping().setAddress("test-reply").setEndpoint(endpoint)))
-
-vertx.eventBus().consumer("with-reply", { message ->
-  message.reply("How are you ?")
-})
-
-camel.start()
-bridge.start()
-
-def template = camel.createProducerTemplate()
-def future = template.asyncRequestBody(endpoint, "hello")
-def response = template.extractFutureBody(future, java.lang.String.class)
-// response == How are you ?
-
+Code not translatable
 ----
 
 === Outbound mapping
@@ -158,5 +143,5 @@ vertx.eventBus().send("camel-route", "hello", { reply ->
 == Stopping the bridge
 
 Don't forget to stop the bridge using the `stop` method. The `stop` method is asynchronous. You can use
-`stop` to be notified when the bridge has been stopped.
+`link:../../apidocs/io/vertx/camel/CamelBridge.html#stop-io.vertx.core.Handler-[stop]` to be notified when the bridge has been stopped.
 

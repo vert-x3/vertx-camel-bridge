@@ -25,7 +25,7 @@ build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-camel-bridge</artifactId>
-  <version>3.3.3</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-camel-bridge:3.3.3'
+compile 'io.vertx:vertx-camel-bridge:3.4.0-SNAPSHOT'
 ----
 
 == Bridge configuration
@@ -81,22 +81,7 @@ code expect as reply to the sent message. When the reply arrives it is propagate
 
 [source,ruby]
 ----
-endpoint = camel.get_endpoint("direct:stuff")
-
-bridge = Java::IoVertxCamel::CamelBridge.create(vertx, Java::IoVertxCamel::CamelBridgeOptions.new(camel).add_inbound_mapping(Java::IoVertxCamel::InboundMapping.new().set_address("test-reply").set_endpoint(endpoint)))
-
-vertx.event_bus().consumer("with-reply") { |message|
-  message.reply("How are you ?")
-}
-
-camel.start()
-bridge.start()
-
-template = camel.create_producer_template()
-future = template.async_request_body(endpoint, "hello")
-response = template.extract_future_body(future, Java::JavaLang::String::class)
-# response == How are you ?
-
+Code not translatable
 ----
 
 === Outbound mapping

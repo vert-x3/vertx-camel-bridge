@@ -40,16 +40,17 @@ compile 'io.vertx:vertx-camel-bridge:3.4.0-SNAPSHOT'
 
 Before being used, the bridge needs to be configured and started:
 
-[source,js]
+[source,kotlin]
 ----
-var camel = new (Java.type("org.apache.camel.impl.DefaultCamelContext"))();
-Java.type("io.vertx.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.camel.CamelBridgeOptions"))(camel).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel("direct:stuff").toVertx("eventbus-address")).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("eventbus-address").toCamel("stream:out"))).start();
+
+var camel = org.apache.camel.impl.DefaultCamelContext()
+io.vertx.camel.CamelBridge.create(vertx, io.vertx.camel.CamelBridgeOptions(camel).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel("direct:stuff").toVertx("eventbus-address")).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("eventbus-address").toCamel("stream:out"))).start()
 
 ----
 
 The bridge requires a `CamelContext`. It will find the endpoint from the context. The bridge needs to be started
 before being used. Be aware the the `start` method is asynchronous. You can use
-`start` to be notified when the bridge has been started.
+`link:../../apidocs/io/vertx/camel/CamelBridge.html#start-io.vertx.core.Handler-[start]` to be notified when the bridge has been started.
 
 
 
@@ -58,11 +59,12 @@ before being used. Be aware the the `start` method is asynchronous. You can use
 Inbound mapping associates a Camel endpoint to an event bus address. Messages received on this endpoint are
 transformed to event bus messages.
 
-[source,js]
+[source,kotlin]
 ----
-var endpoint = camel.getEndpoint("direct:foo");
 
-Java.type("io.vertx.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.camel.CamelBridgeOptions"))(camel).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel("direct:stuff").toVertx("eventbus-address")).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address")).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address").withoutHeadersCopy()).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address").usePublish()).addInboundMapping(Java.type("io.vertx.camel.InboundMapping").fromCamel(endpoint).toVertx("eventbus-address").withBodyType(Java.type("java.lang.String").class)));
+var endpoint = camel.getEndpoint("direct:foo")
+
+io.vertx.camel.CamelBridge.create(vertx, io.vertx.camel.CamelBridgeOptions(camel).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel("direct:stuff").toVertx("eventbus-address")).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel(endpoint).toVertx("eventbus-address")).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel(endpoint).toVertx("eventbus-address").withoutHeadersCopy()).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel(endpoint).toVertx("eventbus-address").usePublish()).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel(endpoint).toVertx("eventbus-address").withBodyType(String.`class`)))
 
 ----
 
@@ -74,12 +76,12 @@ The snippet above shows different ways to configure an inbound mapping:
 * you can configures the type of the event bus message body. If not set it uses the Camel message payload. If
 sets, it looks in the Camel context for a converter between the Camel message payload and the desired type.
 
-_Note_: `org.fusesource.hawtbuf.Buffer` are automatically converted to `link:../../jsdoc/module-vertx-js_buffer-Buffer.html[Buffer]`.
+_Note_: `org.fusesource.hawtbuf.Buffer` are automatically converted to `link:../../apidocs/io/vertx/core/buffer/Buffer.html[Buffer]`.
 
 If `send` is used (so not `publish`), and when the Camel exchange expect a reply (_In Out_ exchange), the Vert.x
 code expect as reply to the sent message. When the reply arrives it is propagated to the exchange:
 
-[source,js]
+[source,kotlin]
 ----
 Code not translatable
 ----
@@ -89,11 +91,12 @@ Code not translatable
 Outbound mapping associates an event bus address to a Camel endpoint. Messages received on this event bus address
 are transformed to Camel messages and sent to the endpoint.
 
-[source,js]
+[source,kotlin]
 ----
-var endpoint = camel.getEndpoint("stream:out");
 
-Java.type("io.vertx.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.camel.CamelBridgeOptions"))(camel).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("eventbus-address").toCamel("stream:out")).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("eventbus-address").toCamel(endpoint)).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("eventbus-address").toCamel(endpoint).withoutHeadersCopy()).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("eventbus-address").toCamel(endpoint)));
+var endpoint = camel.getEndpoint("stream:out")
+
+io.vertx.camel.CamelBridge.create(vertx, io.vertx.camel.CamelBridgeOptions(camel).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("eventbus-address").toCamel("stream:out")).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("eventbus-address").toCamel(endpoint)).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("eventbus-address").toCamel(endpoint).withoutHeadersCopy()).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("eventbus-address").toCamel(endpoint)))
 
 ----
 
@@ -101,19 +104,20 @@ The snippet above shows different ways to configure an outbound mapping.
 
 You can connect your outbound mapping to a Camel route:
 
-[source,js]
+[source,kotlin]
 ----
-camel.addRoutes(new (Java.type("org.apache.camel.builder.RouteBuilder"))());
 
-var bridge = Java.type("io.vertx.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.camel.CamelBridgeOptions"))(camel).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("test").toCamel("direct:start")));
+camel.addRoutes(org.apache.camel.builder.RouteBuilder())
 
-camel.start();
-bridge.start();
+var bridge = io.vertx.camel.CamelBridge.create(vertx, io.vertx.camel.CamelBridgeOptions(camel).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("test").toCamel("direct:start")))
+
+camel.start()
+bridge.start()
 
 
-vertx.eventBus().send("test", "hello", function (reply, reply_err) {
+vertx.eventBus().send<Any>("test", "hello", { reply ->
   // Reply from the route (here it's "OK")
-});
+})
 
 ----
 
@@ -121,27 +125,28 @@ If when you send the message on the event bus you register a reply handler, it c
 expect a response (it uses the request-reply pattern of the EIP). The response is passed in the reply body. If the
 route fails, you get a reply failure (recipient failure), with the message as cause:
 
-[source,js]
+[source,kotlin]
 ----
-camel.addRoutes(new (Java.type("org.apache.camel.builder.RouteBuilder"))());
 
-var bridge = Java.type("io.vertx.camel.CamelBridge").create(vertx, new (Java.type("io.vertx.camel.CamelBridgeOptions"))(camel).addOutboundMapping(Java.type("io.vertx.camel.OutboundMapping").fromVertx("camel-route").toCamel("direct:my-route")));
+camel.addRoutes(org.apache.camel.builder.RouteBuilder())
 
-camel.start();
-bridge.start();
+var bridge = io.vertx.camel.CamelBridge.create(vertx, io.vertx.camel.CamelBridgeOptions(camel).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("camel-route").toCamel("direct:my-route")))
 
-vertx.eventBus().send("camel-route", "hello", function (reply, reply_err) {
-  if (reply_err == null) {
-    var theResponse = reply.body();
+camel.start()
+bridge.start()
+
+vertx.eventBus().send<Any>("camel-route", "hello", { reply ->
+  if (reply.succeeded()) {
+    var theResponse = reply.result().body()
   } else {
-    var theCause = reply_err;
+    var theCause = reply.cause()
   }
-});
+})
 
 ----
 
 == Stopping the bridge
 
 Don't forget to stop the bridge using the `stop` method. The `stop` method is asynchronous. You can use
-`stop` to be notified when the bridge has been stopped.
+`link:../../apidocs/io/vertx/camel/CamelBridge.html#stop-io.vertx.core.Handler-[stop]` to be notified when the bridge has been stopped.
 
