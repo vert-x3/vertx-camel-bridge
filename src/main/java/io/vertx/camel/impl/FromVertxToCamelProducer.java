@@ -17,6 +17,8 @@ package io.vertx.camel.impl;
 
 import io.vertx.camel.OutboundMapping;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.WorkerExecutor;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.ReplyFailure;
 import org.apache.camel.*;
@@ -30,17 +32,28 @@ public class FromVertxToCamelProducer implements Handler<io.vertx.core.eventbus.
   private final Endpoint endpoint;
   private final AsyncProcessor producer;
   private final OutboundMapping outbound;
+  private final boolean blocking;
+  private final Vertx vertx;
+  private final WorkerExecutor pool;
 
   /**
    * Creates a new instance of producer.
    *
+   * @param vertx    the vert.x instance
    * @param producer the underlying producer, must not be {@code null}
    * @param outbound the outbound configuration, must not be {@code null}
+   * @param blocking whether or not the processing is blocking and so should not be run on the event
+   *                 loop
+   * @param pool     the pool on which the blocking code is going to be executed
    */
-  public FromVertxToCamelProducer(Producer producer, OutboundMapping outbound) {
+  public FromVertxToCamelProducer(Vertx vertx, Producer producer, OutboundMapping outbound, boolean blocking,
+                                  WorkerExecutor  pool) {
     this.endpoint = producer.getEndpoint();
     this.producer = AsyncProcessorConverterHelper.convert(producer);
     this.outbound = outbound;
+    this.blocking = blocking;
+    this.vertx = vertx;
+    this.pool = pool;
   }
 
   @Override
@@ -54,8 +67,23 @@ public class FromVertxToCamelProducer implements Handler<io.vertx.core.eventbus.
       MultiMapHelper.toMap(vertxMessage.headers(), in.getHeaders());
     }
 
-    // It's an async producer so won't block.
-    producer.process(exchange, new CamelProducerCallback(exchange, vertxMessage));
+    if (blocking) {
+      if (pool == null) {
+        vertx.executeBlocking(future -> {
+          producer.process(exchange, new CamelProducerCallback(exchange, vertxMessage));
+          future.complete();
+        }, null);
+      } else {
+        pool.executeBlocking(future -> {
+          producer.process(exchange, new CamelProducerCallback(exchange, vertxMessage));
+          future.complete();
+        }, null);
+      }
+    } else {
+      producer.process(exchange, new CamelProducerCallback(exchange, vertxMessage));
+    }
+
+
   }
 
   private static final class CamelProducerCallback implements AsyncCallback {

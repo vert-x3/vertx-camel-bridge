@@ -15,6 +15,7 @@
  */
 package io.vertx.camel;
 
+import io.vertx.core.WorkerExecutor;
 import org.apache.camel.Endpoint;
 
 import java.util.Objects;
@@ -25,6 +26,9 @@ import java.util.Objects;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class OutboundMapping extends CamelMapping {
+
+  private boolean blocking = false;
+  private WorkerExecutor worker;
 
   /**
    * Creates an {@link OutboundMapping} from the given Vert.x address.
@@ -88,5 +92,45 @@ public class OutboundMapping extends CamelMapping {
    */
   public OutboundMapping withoutHeadersCopy() {
     return setHeadersCopy(false);
+  }
+
+  /**
+   * Whether the processing is blocking and so should not be executed on the event loop.
+   *
+   * @return whether or not the processing is blocking
+   */
+  public boolean isBlocking() {
+    return blocking;
+  }
+
+  /**
+   * Sets whether or not the processing is blocking. {@code false} by default.
+   *
+   * @param blocking {@code true} to set it to blocking.
+   * @return the current instance of {@link OutboundMapping}
+   */
+  public OutboundMapping setBlocking(boolean blocking) {
+    this.blocking = blocking;
+    return this;
+  }
+
+  /**
+   * @return the worker thread worker to use to execute the processing. This option is only used if blocking is set to
+   * {@code true}. If not set, it uses the the default worker worker.
+   */
+  public WorkerExecutor getWorkerExecutor() {
+    return worker;
+  }
+
+  /**
+   * Sets the worker thread worker used to execute the blocking processing. This option is only used if blocking is set to
+   * {@code true}. If not set, it uses the the default worker worker.
+   *
+   * @param pool the worker worker on which the code is executed
+   * @return the current instance of {@link OutboundMapping}
+   */
+  public OutboundMapping setWorkerExecutor(WorkerExecutor pool) {
+    this.worker = pool;
+    return this;
   }
 }

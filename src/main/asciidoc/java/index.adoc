@@ -25,7 +25,7 @@ build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-camel-bridge</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-camel-bridge:3.4.0.Beta1'
+compile 'io.vertx:vertx-camel-bridge:3.4.0-SNAPSHOT'
 ----
 
 == Bridge configuration
@@ -183,6 +183,43 @@ vertx.eventBus().send("camel-route", "hello", reply -> {
   }
 });
 ----
+
+If the processing you apply is blocking, you **must** set _blocking_ to `true`. This avoid executing the
+processing on the event loop thread:
+
+[source,java]
+----
+camel.addRoutes(new RouteBuilder() {
+  @Override
+  public void configure() throws Exception {
+    from("direct:my-route")
+      .process(new Processor() {
+        @Override
+        public void process(Exchange exchange) throws Exception {
+          // Do something blocking...
+        }
+      })
+      .to("http://localhost:8080");
+  }
+});
+
+CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+  .addOutboundMapping(OutboundMapping.fromVertx("camel-route").toCamel("direct:my-route").setBlocking(true)));
+
+camel.start();
+bridge.start();
+
+vertx.eventBus().send("camel-route", "hello", reply -> {
+  if (reply.succeeded()) {
+    Object theResponse = reply.result().body();
+  } else {
+    Throwable theCause = reply.cause();
+  }
+});
+----
+
+By default it uses the default worker thread pool, this is customizable using the
+`link:../../apidocs/io/vertx/camel/OutboundMapping.html#setWorkerExecutor-io.vertx.core.WorkerExecutor-[setWorkerExecutor]` method.
 
 == Stopping the bridge
 

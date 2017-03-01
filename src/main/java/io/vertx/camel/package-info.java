@@ -122,6 +122,17 @@
  * {@link examples.Examples#example5(io.vertx.core.Vertx, org.apache.camel.CamelContext)}
  * ----
  *
+ * If the processing you apply is blocking, you **must** set _blocking_ to `true`. This avoid executing the
+ * processing on the event loop thread:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.Examples#example51(io.vertx.core.Vertx, org.apache.camel.CamelContext)}
+ * ----
+ *
+ * By default it uses the default worker thread pool, this is customizable using the
+ * {@link io.vertx.camel.OutboundMapping#setWorkerExecutor(io.vertx.core.WorkerExecutor)} method.
+ *
  * == Stopping the bridge
  *
  * Don't forget to stop the bridge using the `stop` method. The `stop` method is asynchronous. You can use

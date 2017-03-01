@@ -86,7 +86,7 @@ public class CamelBridgeImpl implements CamelBridge {
         + outbound.getAddress());
 
     vertxConsumers.add(vertx.eventBus().consumer(outbound.getAddress(),
-        new FromVertxToCamelProducer(producer, outbound)));
+        new FromVertxToCamelProducer(vertx, producer, outbound, outbound.isBlocking(), outbound.getWorkerExecutor())));
   }
 
   private void createInboundBridge(Vertx vertx, InboundMapping inbound) {

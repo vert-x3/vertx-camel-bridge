@@ -21,9 +21,7 @@ import io.vertx.camel.CamelBridge;
 import io.vertx.camel.CamelBridgeOptions;
 import io.vertx.camel.InboundMapping;
 import io.vertx.camel.OutboundMapping;
-import org.apache.camel.CamelContext;
-import org.apache.camel.Endpoint;
-import org.apache.camel.ProducerTemplate;
+import org.apache.camel.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 
@@ -106,6 +104,36 @@ public class Examples {
 
     CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addOutboundMapping(OutboundMapping.fromVertx("camel-route").toCamel("direct:my-route")));
+
+    camel.start();
+    bridge.start();
+
+    vertx.eventBus().send("camel-route", "hello", reply -> {
+      if (reply.succeeded()) {
+        Object theResponse = reply.result().body();
+      } else {
+        Throwable theCause = reply.cause();
+      }
+    });
+  }
+
+  public void example51(Vertx vertx, CamelContext camel) throws Exception {
+    camel.addRoutes(new RouteBuilder() {
+      @Override
+      public void configure() throws Exception {
+        from("direct:my-route")
+          .process(new Processor() {
+            @Override
+            public void process(Exchange exchange) throws Exception {
+              // Do something blocking...
+            }
+          })
+          .to("http://localhost:8080");
+      }
+    });
+
+    CamelBridge bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+      .addOutboundMapping(OutboundMapping.fromVertx("camel-route").toCamel("direct:my-route").setBlocking(true)));
 
     camel.start();
     bridge.start();

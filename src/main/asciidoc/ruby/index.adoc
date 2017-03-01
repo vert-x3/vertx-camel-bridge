@@ -25,7 +25,7 @@ build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-camel-bridge</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-camel-bridge:3.4.0.Beta1'
+compile 'io.vertx:vertx-camel-bridge:3.4.0-SNAPSHOT'
 ----
 
 == Bridge configuration
@@ -139,6 +139,31 @@ vertx.event_bus().send("camel-route", "hello") { |reply_err,reply|
 }
 
 ----
+
+If the processing you apply is blocking, you **must** set _blocking_ to `true`. This avoid executing the
+processing on the event loop thread:
+
+[source,ruby]
+----
+camel.add_routes(Java::OrgApacheCamelBuilder::RouteBuilder.new())
+
+bridge = Java::IoVertxCamel::CamelBridge.create(vertx, Java::IoVertxCamel::CamelBridgeOptions.new(camel).add_outbound_mapping(Java::IoVertxCamel::OutboundMapping.from_vertx("camel-route").to_camel("direct:my-route").set_blocking(true)))
+
+camel.start()
+bridge.start()
+
+vertx.event_bus().send("camel-route", "hello") { |reply_err,reply|
+  if (reply_err == nil)
+    theResponse = reply.body()
+  else
+    theCause = reply_err
+  end
+}
+
+----
+
+By default it uses the default worker thread pool, this is customizable using the
+`link:unavailable#set_worker_executor-instance_method[setWorkerExecutor]` method.
 
 == Stopping the bridge
 

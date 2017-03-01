@@ -25,7 +25,7 @@ build descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-camel-bridge</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -33,7 +33,7 @@ build descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-camel-bridge:3.4.0.Beta1'
+compile 'io.vertx:vertx-camel-bridge:3.4.0-SNAPSHOT'
 ----
 
 == Bridge configuration
@@ -42,7 +42,6 @@ Before being used, the bridge needs to be configured and started:
 
 [source,kotlin]
 ----
-
 var camel = org.apache.camel.impl.DefaultCamelContext()
 io.vertx.camel.CamelBridge.create(vertx, io.vertx.camel.CamelBridgeOptions(camel).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel("direct:stuff").toVertx("eventbus-address")).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("eventbus-address").toCamel("stream:out"))).start()
 
@@ -61,7 +60,6 @@ transformed to event bus messages.
 
 [source,kotlin]
 ----
-
 var endpoint = camel.getEndpoint("direct:foo")
 
 io.vertx.camel.CamelBridge.create(vertx, io.vertx.camel.CamelBridgeOptions(camel).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel("direct:stuff").toVertx("eventbus-address")).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel(endpoint).toVertx("eventbus-address")).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel(endpoint).toVertx("eventbus-address").withoutHeadersCopy()).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel(endpoint).toVertx("eventbus-address").usePublish()).addInboundMapping(io.vertx.camel.InboundMapping.fromCamel(endpoint).toVertx("eventbus-address").withBodyType(String.`class`)))
@@ -93,7 +91,6 @@ are transformed to Camel messages and sent to the endpoint.
 
 [source,kotlin]
 ----
-
 var endpoint = camel.getEndpoint("stream:out")
 
 io.vertx.camel.CamelBridge.create(vertx, io.vertx.camel.CamelBridgeOptions(camel).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("eventbus-address").toCamel("stream:out")).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("eventbus-address").toCamel(endpoint)).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("eventbus-address").toCamel(endpoint).withoutHeadersCopy()).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("eventbus-address").toCamel(endpoint)))
@@ -106,7 +103,6 @@ You can connect your outbound mapping to a Camel route:
 
 [source,kotlin]
 ----
-
 camel.addRoutes(org.apache.camel.builder.RouteBuilder())
 
 var bridge = io.vertx.camel.CamelBridge.create(vertx, io.vertx.camel.CamelBridgeOptions(camel).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("test").toCamel("direct:start")))
@@ -127,7 +123,6 @@ route fails, you get a reply failure (recipient failure), with the message as ca
 
 [source,kotlin]
 ----
-
 camel.addRoutes(org.apache.camel.builder.RouteBuilder())
 
 var bridge = io.vertx.camel.CamelBridge.create(vertx, io.vertx.camel.CamelBridgeOptions(camel).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("camel-route").toCamel("direct:my-route")))
@@ -144,6 +139,31 @@ vertx.eventBus().send<Any>("camel-route", "hello", { reply ->
 })
 
 ----
+
+If the processing you apply is blocking, you **must** set _blocking_ to `true`. This avoid executing the
+processing on the event loop thread:
+
+[source,kotlin]
+----
+camel.addRoutes(org.apache.camel.builder.RouteBuilder())
+
+var bridge = io.vertx.camel.CamelBridge.create(vertx, io.vertx.camel.CamelBridgeOptions(camel).addOutboundMapping(io.vertx.camel.OutboundMapping.fromVertx("camel-route").toCamel("direct:my-route").setBlocking(true)))
+
+camel.start()
+bridge.start()
+
+vertx.eventBus().send<Any>("camel-route", "hello", { reply ->
+  if (reply.succeeded()) {
+    var theResponse = reply.result().body()
+  } else {
+    var theCause = reply.cause()
+  }
+})
+
+----
+
+By default it uses the default worker thread pool, this is customizable using the
+`link:../../apidocs/io/vertx/camel/OutboundMapping.html#setWorkerExecutor-io.vertx.core.WorkerExecutor-[setWorkerExecutor]` method.
 
 == Stopping the bridge
 
