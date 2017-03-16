@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>vertx-camel-bridge</artifactId>
-  <version>3.4.1</version>
+  <version>3.4.2-SNAPSHOT</version>
 
   <properties>
     <vertx.version>${project.version}</vertx.version>
