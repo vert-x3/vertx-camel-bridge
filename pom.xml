@@ -14,7 +14,7 @@
 
   <properties>
     <vertx.version>${project.version}</vertx.version>
-    <camel.version>2.18.3</camel.version>
+    <camel.version>2.19.0</camel.version>
   </properties>
 
   <dependencyManagement>
