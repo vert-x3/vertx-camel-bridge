@@ -44,6 +44,7 @@ import static com.jayway.awaitility.Awaitility.await;
 import static io.vertx.camel.OutboundMapping.fromVertx;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 
 /**
@@ -422,7 +423,7 @@ public class OutboundEndpointTest {
       calledSpy.set(reply.cause().getMessage());
     });
 
-    await().atMost(DEFAULT_TIMEOUT).untilAtomic(calledSpy, is("Connection refused"));
+    await().atMost(DEFAULT_TIMEOUT).untilAtomic(calledSpy, containsString("Connection refused"));
   }
 
 }
