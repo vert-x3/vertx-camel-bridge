@@ -84,6 +84,8 @@ code expect as reply to the sent message. When the reply arrives it is propagate
 Code not translatable
 ----
 
+You can also configure the reply `timeout` using `link:unavailable#set_timeout-instance_method[setTimeout]`.
+
 === Outbound mapping
 
 Outbound mapping associates an event bus address to a Camel endpoint. Messages received on this event bus address

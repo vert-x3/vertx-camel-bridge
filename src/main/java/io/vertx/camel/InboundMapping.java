@@ -35,6 +35,8 @@ public class InboundMapping extends CamelMapping {
 
   private Class bodyType;
 
+  private int timeout;
+
   /**
    * Creates an {@link InboundMapping} from the given Camel endpoint.
    *
@@ -139,5 +141,23 @@ public class InboundMapping extends CamelMapping {
   public InboundMapping usePublish() {
     publish = true;
     return this;
+  }
+
+  /**
+   * Sets the timeout in milliseconds.
+   * @param timeout the time out, must be strictly positive
+   *
+   * @return the current {@link InboundMapping}
+   */
+  public InboundMapping setTimeout(int timeout) {
+    if (timeout <= 0) {
+      throw new IllegalArgumentException("Invalid timeout value, it must be > 0");
+    }
+    this.timeout = timeout;
+    return this;
+  }
+
+  public int getTimeout() {
+    return timeout;
   }
 }

@@ -56,6 +56,9 @@ public class CamelToVertxProcessor implements AsyncProcessor {
     Object body = CamelHelper.convert(inbound, in);
 
     DeliveryOptions delivery = CamelHelper.getDeliveryOptions(in, inbound.isHeadersCopy());
+    if (inbound.getTimeout() > 0) {
+      delivery.setSendTimeout(inbound.getTimeout());
+    }
 
     try {
       if (inbound.isPublish()) {

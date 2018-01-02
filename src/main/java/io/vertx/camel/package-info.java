@@ -94,6 +94,8 @@
  * {@link examples.Examples#example6(io.vertx.core.Vertx, org.apache.camel.CamelContext)}
  * ----
  *
+ * You can also configure the reply {@code timeout} using {@link io.vertx.camel.InboundMapping#setTimeout(int)}.
+ *
  * === Outbound mapping
  *
  * Outbound mapping associates an event bus address to a Camel endpoint. Messages received on this event bus address

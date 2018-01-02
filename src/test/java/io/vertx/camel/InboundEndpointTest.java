@@ -30,6 +30,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.spi.Synchronization;
 import org.apache.camel.support.SynchronizationAdapter;
 import org.junit.After;
 import org.junit.Before;
@@ -358,6 +359,73 @@ public class InboundEndpointTest {
       // /queue, don't ask why they added a /
       connection.result().send("/queue", Buffer.buffer(new JsonObject().put("foo", "bar").encode()));
       connection.result().close();
+    });
+  }
+
+  /**
+   * Reproducer for https://github.com/vert-x3/vertx-camel-bridge/issues/27
+   */
+  @Test
+  public void testReplyTimeout(TestContext tc) throws Exception {
+    Async async = tc.async();
+
+    Endpoint endpoint = camel.getEndpoint("direct:foo");
+
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+      .addInboundMapping(fromCamel(endpoint).toVertx("test").setTimeout(5000)));
+
+    camel.start();
+    BridgeHelper.startBlocking(bridge);
+
+    vertx.eventBus().consumer("test", message -> {
+      // Simulate a timeout, so do not reply.
+    });
+
+    ProducerTemplate producer = camel.createProducerTemplate();
+    long begin = System.currentTimeMillis();
+    producer.asyncCallbackRequestBody(endpoint, "ping", new Synchronization() {
+      @Override
+      public void onComplete(Exchange exchange) {
+        tc.fail("The interaction should fail");
+      }
+
+      @Override
+      public void onFailure(Exchange exchange) {
+        tc.assertTrue(exchange.getException().getMessage().contains("Timed out"));
+        tc.assertTrue(exchange.getException().getMessage().contains("5000"));
+        long end = System.currentTimeMillis();
+        tc.assertTrue((end - begin) < 20000);
+        async.complete();
+      }
+    });
+  }
+
+  @Test
+  public void testNoReceiver(TestContext tc) throws Exception {
+    Async async = tc.async();
+
+    Endpoint endpoint = camel.getEndpoint("direct:foo");
+
+    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
+      .addInboundMapping(fromCamel(endpoint).toVertx("test").setTimeout(5000)));
+
+    camel.start();
+    BridgeHelper.startBlocking(bridge);
+
+    // Unlike the previous test, we don't register a consumer.
+
+    ProducerTemplate producer = camel.createProducerTemplate();
+    producer.asyncCallbackRequestBody(endpoint, "ping", new Synchronization() {
+      @Override
+      public void onComplete(Exchange exchange) {
+        tc.fail("The interaction should fail");
+      }
+
+      @Override
+      public void onFailure(Exchange exchange) {
+        tc.assertTrue(exchange.getException().getMessage().contains("No handlers for address test"));
+        async.complete();
+      }
     });
   }
 }
