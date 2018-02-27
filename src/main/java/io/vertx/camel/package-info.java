@@ -13,7 +13,4 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-@ModuleGen(name = "vertx-camel-bridge", groupPackage = "io.vertx")
 package io.vertx.camel;
-
-import io.vertx.codegen.annotations.ModuleGen;
