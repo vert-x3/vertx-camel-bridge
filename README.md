@@ -1,5 +1,7 @@
 # Vert.x Camel Bridge
 
+[![Build Status](https://travis-ci.org/vert-x3/vertx-camel-bridge.svg?branch=master)](https://travis-ci.org/vert-x3/vertx-camel-bridge)
+
 This component lets Vert.x application to interact with Camel endpoints:
 
 * event bus message can be propagated to Camel endpoints
@@ -9,7 +11,7 @@ See the [manual](src/main/asciidoc/java/index.adoc) for more details.
 
 # FAQ
 
-## Intellij issue 
+## Intellij issue
 
 * Junit Test can't be launched - @{surefireArgLine}
 
