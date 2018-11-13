@@ -77,7 +77,7 @@ code expect as reply to the sent message. When the reply arrives it is propagate
 {@link examples.Examples#example6(io.vertx.core.Vertx, org.apache.camel.CamelContext)}
 ----
 
-You can also configure the reply {@code timeout} using {@link io.vertx.camel.InboundMapping#setTimeout(int)}.
+You can also configure the reply `timeout` using {@link io.vertx.camel.InboundMapping#setTimeout(int)}.
 
 === Outbound mapping
 
