@@ -293,7 +293,7 @@ public class OutboundEndpointTest {
     BridgeHelper.startBlocking(bridge);
 
     Async async = context.async();
-    vertx.eventBus().send("test", "hello", reply -> {
+    vertx.eventBus().request("test", "hello", reply -> {
       context.assertEquals("OK", reply.result().body());
       async.complete();
     });
@@ -419,7 +419,7 @@ public class OutboundEndpointTest {
     camel.start();
     BridgeHelper.startBlocking(bridge);
 
-    vertx.eventBus().send("camel-route", "hello", reply -> {
+    vertx.eventBus().request("camel-route", "hello", reply -> {
       calledSpy.set(reply.cause().getMessage());
     });
 

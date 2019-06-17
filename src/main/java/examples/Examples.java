@@ -88,7 +88,7 @@ public class Examples {
     bridge.start();
 
 
-    vertx.eventBus().send("test", "hello", reply -> {
+    vertx.eventBus().request("test", "hello", reply -> {
       // Reply from the route (here it's "OK")
     });
   }
@@ -108,7 +108,7 @@ public class Examples {
     camel.start();
     bridge.start();
 
-    vertx.eventBus().send("camel-route", "hello", reply -> {
+    vertx.eventBus().request("camel-route", "hello", reply -> {
       if (reply.succeeded()) {
         Object theResponse = reply.result().body();
       } else {
@@ -138,7 +138,7 @@ public class Examples {
     camel.start();
     bridge.start();
 
-    vertx.eventBus().send("camel-route", "hello", reply -> {
+    vertx.eventBus().request("camel-route", "hello", reply -> {
       if (reply.succeeded()) {
         Object theResponse = reply.result().body();
       } else {
