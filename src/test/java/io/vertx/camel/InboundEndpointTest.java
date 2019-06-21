@@ -308,7 +308,7 @@ public class InboundEndpointTest {
     // TODO: a bug in Camel 2.18.0, so we need to start Camel first when using camel-stomp
     // can be reverted when using Camel 2.18.1
     camel.start();
-    Endpoint endpoint = camel.getEndpoint("stomp:queue");
+    Endpoint endpoint = camel.getEndpoint("stomp:/queue");
 
     bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addInboundMapping(fromCamel(endpoint).toVertx("test")));
@@ -341,7 +341,7 @@ public class InboundEndpointTest {
     // TODO: a bug in Camel 2.18.0, so we need to start Camel first when using camel-stomp
     // can be reverted when using Camel 2.18.1
     camel.start();
-    Endpoint endpoint = camel.getEndpoint("stomp:queue");
+    Endpoint endpoint = camel.getEndpoint("stomp:/queue");
 
     bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
         .addInboundMapping(fromCamel(endpoint).toVertx("test")));
