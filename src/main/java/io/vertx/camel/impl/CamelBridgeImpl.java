@@ -64,7 +64,12 @@ public class CamelBridgeImpl implements CamelBridge {
     Objects.requireNonNull(camel);
     this.vertx = vertx;
 
+    // validate all endpoints eager so we get errors early
+    options.getInboundMappings().forEach(this::validate);
+    options.getOutboundMappings().forEach(this::validate);
+
     try {
+      // setup the inbound and outbound bridge after camel has been started (so all camel components are started)
       this.camel.addStartupListener(new ExtendedStartupListener() {
         public void onCamelContextFullyStarted(CamelContext context, boolean alreadyStarted) throws Exception {
           for (InboundMapping inbound : options.getInboundMappings()) {
@@ -99,18 +104,21 @@ public class CamelBridgeImpl implements CamelBridge {
       throw new IllegalStateException("The endpoint " + outbound.getUri() + " does not support producers", e);
     }
 
-    LOGGER.info("Creating Vert.x message consumer for " + outbound.getUri() + " receiving messages from "
-        + outbound.getAddress());
+    LOGGER.debug("Creating Vert.x message consumer for " + outbound.getUri() + " receiving messages from "
+      + outbound.getAddress());
 
     vertxConsumers.add(vertx.eventBus().consumer(outbound.getAddress(),
         new FromVertxToCamelProducer(vertx, producer, outbound, outbound.isBlocking(), outbound.getWorkerExecutor())));
+
+    LOGGER.info("Created Vert.x message consumer for " + outbound.getUri() + " receiving messages from "
+      + outbound.getAddress());
   }
 
   private void createInboundBridge(Vertx vertx, InboundMapping inbound) {
     Endpoint endpoint = validate(inbound);
 
     try {
-      LOGGER.info("Creating camel consumer for " + inbound.getUri() + " sending messages to " + inbound.getAddress());
+      LOGGER.debug("Creating camel consumer for " + inbound.getUri() + " sending messages to " + inbound.getAddress());
       camelConsumers.add(endpoint.createConsumer(new CamelToVertxProcessor(vertx, inbound)));
     } catch (Exception e) {
       throw new IllegalStateException("The endpoint " + inbound.getUri() + " does not support consumers", e);
