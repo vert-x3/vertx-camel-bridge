@@ -25,7 +25,11 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;
+import org.apache.camel.ExtendedStartupListener;
 import org.apache.camel.Producer;
+import org.apache.camel.StartupListener;
+import org.apache.camel.VetoCamelContextStartException;
+import org.apache.camel.support.LifecycleStrategySupport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +50,6 @@ public class CamelBridgeImpl implements CamelBridge {
   private static final Logger LOGGER = LoggerFactory.getLogger(CamelBridgeImpl.class);
   private final Vertx vertx;
 
-
   /**
    * Creates an instance of the bridge.
    *
@@ -60,14 +63,28 @@ public class CamelBridgeImpl implements CamelBridge {
     Objects.requireNonNull(camel);
     this.vertx = vertx;
 
-    for (InboundMapping inbound : options.getInboundMappings()) {
-      // camel -> vert.x
-      createInboundBridge(vertx, inbound);
-    }
+    try {
+      this.camel.addStartupListener(new ExtendedStartupListener() {
+        @Override
+        public void onCamelContextFullyStarted(CamelContext context, boolean alreadyStarted) throws Exception {
+          for (InboundMapping inbound : options.getInboundMappings()) {
+            // camel -> vert.x
+            createInboundBridge(vertx, inbound);
+          }
 
-    for (OutboundMapping outbound : options.getOutboundMappings()) {
-      // vert.x -> camel
-      createOutboundBridge(vertx, outbound);
+          for (OutboundMapping outbound : options.getOutboundMappings()) {
+            // vert.x -> camel
+            createOutboundBridge(vertx, outbound);
+          }
+        }
+
+        @Override
+        public void onCamelContextStarted(CamelContext context, boolean alreadyStarted) throws Exception {
+          // noop
+        }
+      });
+    } catch (Exception e) {
+      throw new IllegalStateException("Error preparing Camel with vert.x", e);
     }
   }
 
