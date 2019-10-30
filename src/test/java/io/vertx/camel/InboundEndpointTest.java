@@ -297,7 +297,6 @@ public class InboundEndpointTest {
   }
 
   @Test
-  @Ignore
   public void testWithStomp(TestContext context) throws Exception {
     StompServerHandler serverHandler = StompServerHandler.create(vertx);
     StompServer.create(vertx).handler(serverHandler).listen(ar -> {
@@ -322,8 +321,7 @@ public class InboundEndpointTest {
     BridgeHelper.startBlocking(bridge);
 
     StompClient.create(vertx).connect(connection -> {
-      // /queue, don't ask why they added a /
-      connection.result().send("/queue", Buffer.buffer("hello"));
+      connection.result().send("queue", Buffer.buffer("hello"));
       connection.result().close();
     });
   }
@@ -355,8 +353,7 @@ public class InboundEndpointTest {
     BridgeHelper.startBlocking(bridge);
 
     StompClient.create(vertx).connect(connection -> {
-      // /queue, don't ask why they added a /
-      connection.result().send("/queue", Buffer.buffer(new JsonObject().put("foo", "bar").encode()));
+      connection.result().send("queue", Buffer.buffer(new JsonObject().put("foo", "bar").encode()));
       connection.result().close();
     });
   }

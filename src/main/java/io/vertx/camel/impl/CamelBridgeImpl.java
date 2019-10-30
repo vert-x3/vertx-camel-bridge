@@ -15,7 +15,15 @@
  */
 package io.vertx.camel.impl;
 
-import io.vertx.camel.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import io.vertx.camel.CamelBridge;
+import io.vertx.camel.CamelBridgeOptions;
+import io.vertx.camel.CamelMapping;
+import io.vertx.camel.InboundMapping;
+import io.vertx.camel.OutboundMapping;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -27,13 +35,6 @@ import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;
 import org.apache.camel.ExtendedStartupListener;
 import org.apache.camel.Producer;
-import org.apache.camel.StartupListener;
-import org.apache.camel.VetoCamelContextStartException;
-import org.apache.camel.support.LifecycleStrategySupport;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * The implementation of the camel bridge.
@@ -65,7 +66,6 @@ public class CamelBridgeImpl implements CamelBridge {
 
     try {
       this.camel.addStartupListener(new ExtendedStartupListener() {
-        @Override
         public void onCamelContextFullyStarted(CamelContext context, boolean alreadyStarted) throws Exception {
           for (InboundMapping inbound : options.getInboundMappings()) {
             // camel -> vert.x
@@ -115,6 +115,7 @@ public class CamelBridgeImpl implements CamelBridge {
     } catch (Exception e) {
       throw new IllegalStateException("The endpoint " + inbound.getUri() + " does not support consumers", e);
     }
+    LOGGER.info("Created camel consumer for " + inbound.getUri() + " sending messages to " + inbound.getAddress());
   }
 
   private Endpoint validate(CamelMapping mapping) {
