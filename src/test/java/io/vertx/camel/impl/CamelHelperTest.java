@@ -2,6 +2,7 @@ package io.vertx.camel.impl;
 
 import io.vertx.core.eventbus.DeliveryOptions;
 import org.apache.camel.Message;
+import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.DefaultMessage;
 import org.junit.Test;
 
@@ -16,7 +17,7 @@ public class CamelHelperTest {
 
   @Test
   public void testTheCopyOfHeaders() {
-    Message msg = new DefaultMessage();
+    Message msg = new DefaultMessage(new DefaultCamelContext());
     msg.setHeader("CamelRedelivered", false);
     msg.setHeader("CamelRedeliveryCounter", 0);
     msg.setHeader("JMSCorrelationID", "");
