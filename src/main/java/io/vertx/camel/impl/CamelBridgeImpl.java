@@ -15,7 +15,15 @@
  */
 package io.vertx.camel.impl;
 
-import io.vertx.camel.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import io.vertx.camel.CamelBridge;
+import io.vertx.camel.CamelBridgeOptions;
+import io.vertx.camel.CamelMapping;
+import io.vertx.camel.InboundMapping;
+import io.vertx.camel.OutboundMapping;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -25,11 +33,8 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Consumer;
 import org.apache.camel.Endpoint;
+import org.apache.camel.ExtendedStartupListener;
 import org.apache.camel.Producer;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * The implementation of the camel bridge.
@@ -46,7 +51,6 @@ public class CamelBridgeImpl implements CamelBridge {
   private static final Logger LOGGER = LoggerFactory.getLogger(CamelBridgeImpl.class);
   private final Vertx vertx;
 
-
   /**
    * Creates an instance of the bridge.
    *
@@ -60,14 +64,32 @@ public class CamelBridgeImpl implements CamelBridge {
     Objects.requireNonNull(camel);
     this.vertx = vertx;
 
-    for (InboundMapping inbound : options.getInboundMappings()) {
-      // camel -> vert.x
-      createInboundBridge(vertx, inbound);
-    }
+    // validate all endpoints eager so we get errors early
+    options.getInboundMappings().forEach(this::validate);
+    options.getOutboundMappings().forEach(this::validate);
 
-    for (OutboundMapping outbound : options.getOutboundMappings()) {
-      // vert.x -> camel
-      createOutboundBridge(vertx, outbound);
+    try {
+      // setup the inbound and outbound bridge after camel has been started (so all camel components are started)
+      this.camel.addStartupListener(new ExtendedStartupListener() {
+        public void onCamelContextFullyStarted(CamelContext context, boolean alreadyStarted) throws Exception {
+          for (InboundMapping inbound : options.getInboundMappings()) {
+            // camel -> vert.x
+            createInboundBridge(vertx, inbound);
+          }
+
+          for (OutboundMapping outbound : options.getOutboundMappings()) {
+            // vert.x -> camel
+            createOutboundBridge(vertx, outbound);
+          }
+        }
+
+        @Override
+        public void onCamelContextStarted(CamelContext context, boolean alreadyStarted) throws Exception {
+          // noop
+        }
+      });
+    } catch (Exception e) {
+      throw new IllegalStateException("Error preparing Camel with vert.x", e);
     }
   }
 
@@ -82,22 +104,26 @@ public class CamelBridgeImpl implements CamelBridge {
       throw new IllegalStateException("The endpoint " + outbound.getUri() + " does not support producers", e);
     }
 
-    LOGGER.info("Creating Vert.x message consumer for " + outbound.getUri() + " receiving messages from "
-        + outbound.getAddress());
+    LOGGER.debug("Creating Vert.x message consumer for " + outbound.getUri() + " receiving messages from "
+      + outbound.getAddress());
 
     vertxConsumers.add(vertx.eventBus().consumer(outbound.getAddress(),
         new FromVertxToCamelProducer(vertx, producer, outbound, outbound.isBlocking(), outbound.getWorkerExecutor())));
+
+    LOGGER.info("Created Vert.x message consumer for " + outbound.getUri() + " receiving messages from "
+      + outbound.getAddress());
   }
 
   private void createInboundBridge(Vertx vertx, InboundMapping inbound) {
     Endpoint endpoint = validate(inbound);
 
     try {
-      LOGGER.info("Creating camel consumer for " + inbound.getUri() + " sending messages to " + inbound.getAddress());
+      LOGGER.debug("Creating camel consumer for " + inbound.getUri() + " sending messages to " + inbound.getAddress());
       camelConsumers.add(endpoint.createConsumer(new CamelToVertxProcessor(vertx, inbound)));
     } catch (Exception e) {
       throw new IllegalStateException("The endpoint " + inbound.getUri() + " does not support consumers", e);
     }
+    LOGGER.info("Created camel consumer for " + inbound.getUri() + " sending messages to " + inbound.getAddress());
   }
 
   private Endpoint validate(CamelMapping mapping) {
