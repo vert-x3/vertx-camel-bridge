@@ -75,7 +75,7 @@ public class InOutTest {
       .addInboundMapping(InboundMapping.fromCamel("direct:code-generator").toVertx("code-generator")));
 
     vertx.eventBus().consumer("code-generator", msg -> {
-      assertThat(msg.headers().names()).hasSize(3)
+      assertThat(msg.headers().names()).hasSize(2)
         .contains("headerA", "headerB");
 
       msg.reply("OK !", new DeliveryOptions().addHeader("foo", "bar"));
