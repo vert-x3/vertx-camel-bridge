@@ -3,7 +3,7 @@ package io.vertx.camel.impl;
 import io.vertx.core.eventbus.DeliveryOptions;
 import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.impl.DefaultMessage;
+import org.apache.camel.support.DefaultMessage;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -22,7 +22,7 @@ import io.vertx.core.WorkerExecutor;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.ReplyFailure;
 import org.apache.camel.*;
-import org.apache.camel.util.AsyncProcessorConverterHelper;
+import org.apache.camel.support.AsyncProcessorConverterHelper;
 
 /**
  * Handles the transfer from Vert.x message to Camel (outbound).

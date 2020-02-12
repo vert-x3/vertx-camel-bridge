@@ -22,8 +22,11 @@ import org.apache.camel.AsyncCallback;
 import org.apache.camel.AsyncProcessor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.util.AsyncProcessorHelper;
-import org.apache.camel.util.ExchangeHelper;
+import org.apache.camel.support.AsyncCallbackToCompletableFutureAdapter;
+import org.apache.camel.support.AsyncProcessorHelper;
+import org.apache.camel.support.ExchangeHelper;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Processor to send messages from Camel to Vert.x (inbound).
@@ -90,6 +93,13 @@ public class CamelToVertxProcessor implements AsyncProcessor {
 
     callback.done(true);
     return true;
+  }
+
+  @Override
+  public CompletableFuture<Exchange> processAsync(Exchange exchange) {
+    AsyncCallbackToCompletableFutureAdapter<Exchange> callback = new AsyncCallbackToCompletableFutureAdapter<>(exchange);
+    process(exchange, callback);
+    return callback.getFuture();
   }
 
 }
