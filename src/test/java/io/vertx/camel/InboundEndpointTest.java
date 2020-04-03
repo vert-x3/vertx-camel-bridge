@@ -20,6 +20,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.stomp.StompClient;
+import io.vertx.ext.stomp.StompClientConnection;
 import io.vertx.ext.stomp.StompServer;
 import io.vertx.ext.stomp.StompServerHandler;
 import io.vertx.ext.unit.Async;
@@ -37,6 +38,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static io.vertx.camel.InboundMapping.fromCamel;
@@ -299,9 +302,9 @@ public class InboundEndpointTest {
   @Test
   public void testWithStomp(TestContext context) throws Exception {
     StompServerHandler serverHandler = StompServerHandler.create(vertx);
-    StompServer.create(vertx).handler(serverHandler).listen(ar -> {
-      stomp = ar.result();
-    });
+    StompServer.create(vertx).handler(serverHandler).listen(context.asyncAssertSuccess(s -> {
+      stomp = s;
+    }));
     await().atMost(DEFAULT_TIMEOUT).until(() -> stomp != null);
 
     Async async = context.async();
@@ -318,12 +321,22 @@ public class InboundEndpointTest {
     });
 
     camel.start();
-    BridgeHelper.startBlocking(bridge);
+    Async a = context.async();
+    bridge.start(context.asyncAssertSuccess(v -> a.complete()));
+    a.awaitSuccess(20000);
 
-    StompClient.create(vertx).connect(connection -> {
-      connection.result().send("queue", Buffer.buffer("hello"));
-      connection.result().close();
-    });
+    AtomicReference<StompClientConnection> clientRef = new AtomicReference<>();
+    StompClient.create(vertx).connect(context.asyncAssertSuccess(client -> {
+      clientRef.set(client);
+      client.send("queue", Buffer.buffer("hello"), context.asyncAssertSuccess(receipt -> {
+      }));
+    }));
+
+    try {
+      async.awaitSuccess(20000);
+    } finally {
+      clientRef.get().close();
+    }
   }
 
   @Test
