@@ -25,7 +25,6 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
@@ -297,39 +296,6 @@ public class OutboundEndpointTest {
       context.assertEquals("OK", reply.result().body());
       async.complete();
     });
-  }
-
-  @Test
-  public void testWithRoute() throws Exception {
-    AtomicBoolean calledSpy = new AtomicBoolean();
-    AtomicBoolean startedSpy = new AtomicBoolean();
-    vertx.createHttpServer().requestHandler(request -> {
-      calledSpy.set(true);
-      request.response().end("Alright");
-    }).listen(8081, ar -> {
-      startedSpy.set(ar.succeeded());
-    });
-
-    await().atMost(DEFAULT_TIMEOUT).untilAtomic(startedSpy, is(true));
-
-    camel.addRoutes(new RouteBuilder() {
-      @Override
-      public void configure() throws Exception {
-        from("direct:my-route")
-            .to("seda:next")
-            .to("http://localhost:8081");
-      }
-    });
-
-    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(fromVertx("camel-route").toCamel("direct:my-route")));
-
-    camel.start();
-    BridgeHelper.startBlocking(bridge);
-
-    vertx.eventBus().send("camel-route", "hello");
-
-    await().atMost(DEFAULT_TIMEOUT).untilAtomic(calledSpy, is(true));
   }
 
   @Test

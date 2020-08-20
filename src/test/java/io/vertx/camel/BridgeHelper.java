@@ -36,7 +36,7 @@ public class BridgeHelper {
       }
       spy.set(v.succeeded());
     });
-    await().atMost(2, TimeUnit.SECONDS).untilAtomic(spy, is(true));
+    await().atMost(20, TimeUnit.SECONDS).untilAtomic(spy, is(true));
   }
 
   public static void stopBlocking(CamelBridge bridge) {
@@ -47,6 +47,6 @@ public class BridgeHelper {
       }
       spy.set(v.succeeded());
     });
-    await().atMost(2, TimeUnit.SECONDS).untilAtomic(spy, is(true));
+    await().atMost(20, TimeUnit.SECONDS).untilAtomic(spy, is(true));
   }
 }
