@@ -307,7 +307,7 @@ public class InboundEndpointTest {
     }));
     await().atMost(DEFAULT_TIMEOUT).until(() -> stomp != null);
 
-    Async async = context.async();
+    Async async = context.async(2);
 
     Endpoint endpoint = camel.getEndpoint("stomp:queue");
 
@@ -317,7 +317,7 @@ public class InboundEndpointTest {
     vertx.eventBus().consumer("test", message -> {
       // We get a buffer.
       context.assertEquals("hello", message.body().toString());
-      async.complete();
+      async.countDown();
     });
 
     camel.start();
@@ -329,6 +329,7 @@ public class InboundEndpointTest {
     StompClient.create(vertx).connect(context.asyncAssertSuccess(client -> {
       clientRef.set(client);
       client.send("queue", Buffer.buffer("hello"), context.asyncAssertSuccess(receipt -> {
+        async.countDown();
       }));
     }));
 
