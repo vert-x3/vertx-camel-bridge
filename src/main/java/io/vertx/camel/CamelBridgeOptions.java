@@ -15,6 +15,9 @@
  */
 package io.vertx.camel;
 
+import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.core.json.JsonObject;
 import org.apache.camel.CamelContext;
 
 import java.util.ArrayList;
@@ -26,6 +29,7 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
+@DataObject
 public class CamelBridgeOptions {
 
   // This class is not a DataObject as it's not polyglot and requires object not serializable from / to Json (Camel
@@ -45,6 +49,17 @@ public class CamelBridgeOptions {
   public CamelBridgeOptions(CamelContext context) {
     Objects.requireNonNull(context);
     this.context = context;
+  }
+
+  /**
+   * Comply with the {@link DataObject} contract, however calling this constructor will always throw.
+   *
+   * @param json a json object
+   * @throws IllegalArgumentException always.
+   */
+  @GenIgnore
+  public CamelBridgeOptions(JsonObject json) {
+    throw new IllegalArgumentException("This class is not a DataObject as it's not polyglot and requires object not serializable from / to Json (CamelContext)");
   }
 
   /**

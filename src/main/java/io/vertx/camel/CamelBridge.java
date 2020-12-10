@@ -16,6 +16,7 @@
 package io.vertx.camel;
 
 import io.vertx.camel.impl.CamelBridgeImpl;
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -25,6 +26,7 @@ import io.vertx.core.Vertx;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
+@VertxGen
 public interface CamelBridge {
 
   /**
