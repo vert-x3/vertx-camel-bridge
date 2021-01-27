@@ -28,6 +28,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
+import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Message;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.impl.DefaultCamelContext;
@@ -138,7 +139,7 @@ public class InboundEndpointTest {
     producer.asyncSend(endpoint, exchange -> {
       Message message = exchange.getIn();
       message.setBody(new Person().setName("bob"));
-      exchange.addOnCompletion(new SynchronizationAdapter() {
+      exchange.adapt(ExtendedExchange.class).addOnCompletion(new SynchronizationAdapter() {
         @Override
         public void onFailure(Exchange exchange) {
           context.assertTrue(exchange.getException().getMessage().contains("No message codec"));
@@ -289,7 +290,7 @@ public class InboundEndpointTest {
     producer.asyncSend(endpoint, exchange -> {
       Message message = exchange.getIn();
       message.setBody(new Person().setName("bob"));
-      exchange.addOnCompletion(new SynchronizationAdapter() {
+      exchange.adapt(ExtendedExchange.class).addOnCompletion(new SynchronizationAdapter() {
         @Override
         public void onFailure(Exchange exchange) {
           context.assertTrue(exchange.getException().getMessage().contains("No message codec"));
