@@ -1,6 +1,6 @@
 # Vert.x Camel Bridge
 
-[![Build Status](https://travis-ci.org/vert-x3/vertx-camel-bridge.svg?branch=master)](https://travis-ci.org/vert-x3/vertx-camel-bridge)
+[![Build Status](https://github.com/vert-x3/vertx-camel-bridge/workflows/CI/badge.svg?branch=3.9)](https://github.com/vert-x3/vertx-camel-bridge/actions?query=workflow%3ACI)
 
 This component lets Vert.x application to interact with Camel endpoints:
 
