@@ -15,6 +15,7 @@
   <properties>
     <vertx.version>${project.version}</vertx.version>
     <camel.version>3.0.1</camel.version>
+    <log4j2.version>2.15.0</log4j2.version>
   </properties>
 
   <dependencyManagement>
@@ -133,19 +134,19 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
-      <version>2.13.3</version>
+      <version>${log4j2.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>2.13.3</version>
+      <version>${log4j2.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
-      <version>2.13.3</version>
+      <version>${log4j2.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
