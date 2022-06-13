@@ -15,7 +15,6 @@
  */
 package io.vertx.camel;
 
-import com.jayway.awaitility.Duration;
 import io.vertx.core.Vertx;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -39,14 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(VertxUnitRunner.class)
 public class InboundReplyTest {
 
-  private static final Duration DEFAULT_TIMEOUT = Duration.TEN_SECONDS;
-
   private Vertx vertx;
   private DefaultCamelContext camel;
-
-
   private CamelBridge bridge;
-
 
   @Before
   public void setUp(TestContext context) {

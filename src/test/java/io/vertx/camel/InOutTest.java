@@ -1,6 +1,5 @@
 package io.vertx.camel;
 
-import com.jayway.awaitility.Duration;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.ext.unit.TestContext;
@@ -13,15 +12,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -30,14 +29,11 @@ import static org.hamcrest.core.Is.is;
 @RunWith(VertxUnitRunner.class)
 public class InOutTest {
 
-  private static final Duration DEFAULT_TIMEOUT = Duration.TEN_SECONDS;
+  private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
 
   private Vertx vertx;
   private DefaultCamelContext camel;
-
-
   private CamelBridge bridge;
-
 
   @Before
   public void setUp(TestContext tc) {
@@ -95,7 +91,7 @@ public class InOutTest {
       responseReceived.set(true);
     });
 
-    await().atMost(1, TimeUnit.MINUTES).untilAtomic(headersReceived, is(true));
-    await().atMost(1, TimeUnit.MINUTES).untilAtomic(responseReceived, is(true));
+    await().atMost(DEFAULT_TIMEOUT).untilAtomic(headersReceived, is(true));
+    await().atMost(DEFAULT_TIMEOUT).untilAtomic(responseReceived, is(true));
   }
 }

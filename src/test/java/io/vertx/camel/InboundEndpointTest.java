@@ -15,7 +15,6 @@
  */
 package io.vertx.camel;
 
-import com.jayway.awaitility.Duration;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
@@ -40,10 +39,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.jayway.awaitility.Awaitility.await;
 import static io.vertx.camel.InboundMapping.fromCamel;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Tests that Camel exchanges are propagated to the event bus
@@ -53,7 +53,7 @@ import static io.vertx.camel.InboundMapping.fromCamel;
 @RunWith(VertxUnitRunner.class)
 public class InboundEndpointTest {
 
-  private static final Duration DEFAULT_TIMEOUT = Duration.TEN_SECONDS;
+  private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
 
   private Vertx vertx;
   private DefaultCamelContext camel;

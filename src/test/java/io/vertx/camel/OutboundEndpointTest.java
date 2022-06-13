@@ -15,7 +15,6 @@
  */
 package io.vertx.camel;
 
-import com.jayway.awaitility.Duration;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.buffer.Buffer;
@@ -35,14 +34,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.jayway.awaitility.Awaitility.await;
 import static io.vertx.camel.OutboundMapping.fromVertx;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 
@@ -54,7 +54,7 @@ import static org.hamcrest.CoreMatchers.is;
 @RunWith(VertxUnitRunner.class)
 public class OutboundEndpointTest {
 
-  private static final Duration DEFAULT_TIMEOUT = Duration.TEN_SECONDS;
+  private static final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
 
   private Vertx vertx;
   private DefaultCamelContext camel;
@@ -241,38 +241,6 @@ public class OutboundEndpointTest {
 
     endpoint.expectedBodiesReceived("hello", "hello2");
     endpoint2.expectedBodiesReceived("hello", "hello2");
-  }
-
-  @Test
-  public void testWithStreams() throws Exception {
-    File root = new File("target/junk");
-    File file = new File(root, "foo.txt");
-    if (file.exists()) {
-      file.delete();
-    }
-    root.mkdirs();
-
-    Endpoint endpoint = camel.getEndpoint("stream:file?fileName=target/junk/foo.txt");
-    camel.addEndpoint("output", endpoint);
-
-    bridge = CamelBridge.create(vertx, new CamelBridgeOptions(camel)
-        .addOutboundMapping(fromVertx("test").toCamel("output")));
-
-    camel.start();
-    BridgeHelper.startBlocking(bridge);
-
-    long date = System.currentTimeMillis();
-    vertx.eventBus().send("test", date);
-
-    await().atMost(DEFAULT_TIMEOUT).until(() -> file.isFile() && FileUtils.readFileToString(file).length() > 0);
-    String string = FileUtils.readFileToString(file);
-    assertThat(string).contains(Long.toString(date));
-
-    long date2 = System.currentTimeMillis();
-    vertx.eventBus().send("test", date2);
-
-    await().atMost(DEFAULT_TIMEOUT).until(() -> FileUtils.readFileToString(file).length() > string.length());
-    assertThat(FileUtils.readFileToString(file)).containsSequence(Long.toString(date), Long.toString(date2));
   }
 
   @Test
