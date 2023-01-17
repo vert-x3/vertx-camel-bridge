@@ -34,7 +34,6 @@
       <!-- specify the SLF4J version to match the one used by vert.x -->
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.36</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
