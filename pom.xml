@@ -16,7 +16,7 @@
 
     <artifactId>vertx-camel-bridge</artifactId>
 
-    <version>3.9.15-SNAPSHOT</version>
+    <version>3.9.15</version>
 
     <properties>
 
