@@ -25,6 +25,7 @@ import io.vertx.camel.CamelMapping;
 import io.vertx.camel.InboundMapping;
 import io.vertx.camel.OutboundMapping;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -141,24 +142,27 @@ public class CamelBridgeImpl implements CamelBridge {
 
   @Override
   public CamelBridge start(Handler<AsyncResult<Void>> completed) {
-    vertx.<Void>executeBlocking(
-        future -> {
-          camelConsumers.stream().forEach(c -> {
-            try {
-              c.start();
-            } catch (Exception e) {
-              future.fail(e);
-            }
-          });
-          camelProducers.stream().forEach(c -> {
-            try {
-              c.start();
-            } catch (Exception e) {
-              future.fail(e);
-            }
-          });
-          future.complete();
-        }).onComplete(completed);
+    Future<Void> fut = vertx.<Void>executeBlocking(
+      future -> {
+        camelConsumers.stream().forEach(c -> {
+          try {
+            c.start();
+          } catch (Exception e) {
+            future.fail(e);
+          }
+        });
+        camelProducers.stream().forEach(c -> {
+          try {
+            c.start();
+          } catch (Exception e) {
+            future.fail(e);
+          }
+        });
+        future.complete();
+      });
+    if (completed != null) {
+      fut.onComplete(completed);
+    }
     return this;
   }
 
@@ -169,25 +173,28 @@ public class CamelBridgeImpl implements CamelBridge {
 
   @Override
   public CamelBridge stop(Handler<AsyncResult<Void>> completed) {
-    vertx.<Void>executeBlocking(
-        future -> {
-          camelConsumers.stream().forEach(c -> {
-            try {
-              c.stop();
-            } catch (Exception e) {
-              future.fail(e);
-            }
-          });
-          camelProducers.stream().forEach(c -> {
-            try {
-              c.stop();
-            } catch (Exception e) {
-              future.fail(e);
-            }
-          });
-          vertxConsumers.stream().forEach(MessageConsumer::unregister);
-          future.complete();
-        }).onComplete(completed);
+    Future<Void> fut = vertx.<Void>executeBlocking(
+      future -> {
+        camelConsumers.stream().forEach(c -> {
+          try {
+            c.stop();
+          } catch (Exception e) {
+            future.fail(e);
+          }
+        });
+        camelProducers.stream().forEach(c -> {
+          try {
+            c.stop();
+          } catch (Exception e) {
+            future.fail(e);
+          }
+        });
+        vertxConsumers.stream().forEach(MessageConsumer::unregister);
+        future.complete();
+      });
+    if (completed != null) {
+      fut.onComplete(completed);
+    }
 
     return this;
   }
