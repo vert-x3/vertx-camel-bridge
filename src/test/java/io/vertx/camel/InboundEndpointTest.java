@@ -77,9 +77,9 @@ public class InboundEndpointTest {
     }
 
     if (stomp != null) {
-      stomp.close(null);
+      stomp.close();
     }
-    vertx.close(tc.asyncAssertSuccess());
+    vertx.close().onComplete(tc.asyncAssertSuccess());
   }
 
   @Test
@@ -303,7 +303,7 @@ public class InboundEndpointTest {
   @Test
   public void testWithStomp(TestContext context) throws Exception {
     StompServerHandler serverHandler = StompServerHandler.create(vertx);
-    StompServer.create(vertx).handler(serverHandler).listen(context.asyncAssertSuccess(s -> {
+    StompServer.create(vertx).handler(serverHandler).listen().onComplete(context.asyncAssertSuccess(s -> {
       stomp = s;
     }));
     await().atMost(DEFAULT_TIMEOUT).until(() -> stomp != null);
@@ -327,9 +327,9 @@ public class InboundEndpointTest {
     a.awaitSuccess(20000);
 
     AtomicReference<StompClientConnection> clientRef = new AtomicReference<>();
-    StompClient.create(vertx).connect(context.asyncAssertSuccess(client -> {
+    StompClient.create(vertx).connect().onComplete(context.asyncAssertSuccess(client -> {
       clientRef.set(client);
-      client.send("queue", Buffer.buffer("hello"), context.asyncAssertSuccess(receipt -> {
+      client.send("queue", Buffer.buffer("hello")).onComplete(context.asyncAssertSuccess(receipt -> {
         async.countDown();
       }));
     }));
@@ -345,7 +345,7 @@ public class InboundEndpointTest {
   @Ignore
   public void testWithStompAndJson(TestContext context) throws Exception {
     StompServerHandler serverHandler = StompServerHandler.create(vertx);
-    StompServer.create(vertx).handler(serverHandler).listen(ar -> {
+    StompServer.create(vertx).handler(serverHandler).listen().onComplete(ar -> {
       stomp = ar.result();
     });
     await().atMost(DEFAULT_TIMEOUT).until(() -> stomp != null);
@@ -367,7 +367,7 @@ public class InboundEndpointTest {
     camel.start();
     BridgeHelper.startBlocking(bridge);
 
-    StompClient.create(vertx).connect(connection -> {
+    StompClient.create(vertx).connect().onComplete(connection -> {
       connection.result().send("queue", Buffer.buffer(new JsonObject().put("foo", "bar").encode()));
       connection.result().close();
     });

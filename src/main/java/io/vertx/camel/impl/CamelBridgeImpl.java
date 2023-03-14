@@ -141,7 +141,7 @@ public class CamelBridgeImpl implements CamelBridge {
 
   @Override
   public CamelBridge start(Handler<AsyncResult<Void>> completed) {
-    vertx.executeBlocking(
+    vertx.<Void>executeBlocking(
         future -> {
           camelConsumers.stream().forEach(c -> {
             try {
@@ -158,9 +158,7 @@ public class CamelBridgeImpl implements CamelBridge {
             }
           });
           future.complete();
-        },
-        completed
-    );
+        }).onComplete(completed);
     return this;
   }
 
@@ -171,7 +169,7 @@ public class CamelBridgeImpl implements CamelBridge {
 
   @Override
   public CamelBridge stop(Handler<AsyncResult<Void>> completed) {
-    vertx.executeBlocking(
+    vertx.<Void>executeBlocking(
         future -> {
           camelConsumers.stream().forEach(c -> {
             try {
@@ -189,9 +187,7 @@ public class CamelBridgeImpl implements CamelBridge {
           });
           vertxConsumers.stream().forEach(MessageConsumer::unregister);
           future.complete();
-        },
-        completed
-    );
+        }).onComplete(completed);
 
     return this;
   }

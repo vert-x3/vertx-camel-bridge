@@ -70,7 +70,7 @@ public class OutboundEndpointTest {
   public void tearDown(TestContext context) throws Exception {
     BridgeHelper.stopBlocking(bridge);
     camel.stop();
-    vertx.close(context.asyncAssertSuccess());
+    vertx.close().onComplete(context.asyncAssertSuccess());
   }
 
   @Test
@@ -260,7 +260,7 @@ public class OutboundEndpointTest {
     BridgeHelper.startBlocking(bridge);
 
     Async async = context.async();
-    vertx.eventBus().request("test", "hello", reply -> {
+    vertx.eventBus().request("test", "hello").onComplete(reply -> {
       context.assertEquals("OK", reply.result().body());
       async.complete();
     });
@@ -273,7 +273,7 @@ public class OutboundEndpointTest {
     vertx.createHttpServer().requestHandler(request -> {
       calledSpy.set(true);
       request.response().end("Alright");
-    }).listen(8081, ar -> {
+    }).listen(8081).onComplete(ar -> {
       startedSpy.set(ar.succeeded());
     });
 
@@ -306,7 +306,7 @@ public class OutboundEndpointTest {
     vertx.createHttpServer().requestHandler(request -> {
       calledSpy.set(true);
       request.response().end("Alright");
-    }).listen(8081, ar -> {
+    }).listen(8081).onComplete(ar -> {
       startedSpy.set(ar.succeeded());
     });
 
@@ -353,7 +353,7 @@ public class OutboundEndpointTest {
     camel.start();
     BridgeHelper.startBlocking(bridge);
 
-    vertx.eventBus().request("camel-route", "hello", reply -> {
+    vertx.eventBus().request("camel-route", "hello").onComplete(reply -> {
       calledSpy.set(reply.cause().getMessage());
     });
 

@@ -48,7 +48,7 @@ public class BridgeStartStopTest {
   @After
   public void tearDown(TestContext context) throws Exception {
     camel.stop();
-    vertx.close(context.asyncAssertSuccess());
+    vertx.close().onComplete(context.asyncAssertSuccess());
   }
 
 
