@@ -52,7 +52,7 @@ public class InboundReplyTest {
   public void tearDown(TestContext context) throws Exception {
     bridge.stop();
     camel.stop();
-    vertx.close(context.asyncAssertSuccess());
+    vertx.close().onComplete(context.asyncAssertSuccess());
   }
 
   @Test

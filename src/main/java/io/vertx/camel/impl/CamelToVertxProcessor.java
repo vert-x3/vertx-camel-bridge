@@ -68,7 +68,7 @@ public class CamelToVertxProcessor implements AsyncProcessor {
         vertx.eventBus().publish(inbound.getAddress(), body, delivery);
       } else {
         if (ExchangeHelper.isOutCapable(exchange)) {
-          vertx.eventBus().request(inbound.getAddress(), body, delivery, reply -> {
+          vertx.eventBus().request(inbound.getAddress(), body, delivery).onComplete(reply -> {
             Message out = exchange.getOut();
             if (reply.succeeded()) {
               out.setBody(reply.result().body());
