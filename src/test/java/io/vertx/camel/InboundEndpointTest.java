@@ -323,7 +323,7 @@ public class InboundEndpointTest {
 
     camel.start();
     Async a = context.async();
-    bridge.start(context.asyncAssertSuccess(v -> a.complete()));
+    bridge.start().onComplete(context.asyncAssertSuccess(v -> a.complete()));
     a.awaitSuccess(20000);
 
     AtomicReference<StompClientConnection> clientRef = new AtomicReference<>();

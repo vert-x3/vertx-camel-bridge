@@ -24,9 +24,7 @@ import io.vertx.camel.CamelBridgeOptions;
 import io.vertx.camel.CamelMapping;
 import io.vertx.camel.InboundMapping;
 import io.vertx.camel.OutboundMapping;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.impl.logging.Logger;
@@ -136,12 +134,7 @@ public class CamelBridgeImpl implements CamelBridge {
   }
 
   @Override
-  public CamelBridge start() {
-    return start(null);
-  }
-
-  @Override
-  public CamelBridge start(Handler<AsyncResult<Void>> completed) {
+  public Future<Void> start() {
     Future<Void> fut = vertx.<Void>executeBlocking(
       future -> {
         camelConsumers.stream().forEach(c -> {
@@ -160,19 +153,11 @@ public class CamelBridgeImpl implements CamelBridge {
         });
         future.complete();
       });
-    if (completed != null) {
-      fut.onComplete(completed);
-    }
-    return this;
+    return fut;
   }
 
   @Override
-  public CamelBridge stop() {
-    return stop(null);
-  }
-
-  @Override
-  public CamelBridge stop(Handler<AsyncResult<Void>> completed) {
+  public Future<Void> stop() {
     Future<Void> fut = vertx.<Void>executeBlocking(
       future -> {
         camelConsumers.stream().forEach(c -> {
@@ -192,12 +177,6 @@ public class CamelBridgeImpl implements CamelBridge {
         vertxConsumers.stream().forEach(MessageConsumer::unregister);
         future.complete();
       });
-    if (completed != null) {
-      fut.onComplete(completed);
-    }
-
-    return this;
+    return fut;
   }
-
-
 }

@@ -17,8 +17,7 @@ package io.vertx.camel;
 
 import io.vertx.camel.impl.CamelBridgeImpl;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 
 /**
@@ -43,32 +42,15 @@ public interface CamelBridge {
   /**
    * Starts the bridge. The bridge is started asynchronously.
    *
-   * @return the current {@link CamelBridge}
+   * @return a future notified when the bridge has started
    */
-  CamelBridge start();
-
-  /**
-   * Starts the bridge.
-   *
-   * @param completed handler called when the bridge has been started.
-   * @return the current {@link CamelBridge}
-   */
-  CamelBridge start(Handler<AsyncResult<Void>> completed);
-
+  Future<Void> start();
 
   /**
    * Stops the bridge. The bridges is stopped asynchronously.
    *
-   * @return the current {@link CamelBridge}
+   * @return a future notified when the bridge has been stopped
    */
-  CamelBridge stop();
-
-  /**
-   * Stops the bridge.
-   *
-   * @param completed handler called when the bridge has been stopped.
-   * @return the current {@link CamelBridge}
-   */
-  CamelBridge stop(Handler<AsyncResult<Void>> completed);
+  Future<Void> stop();
 
 }

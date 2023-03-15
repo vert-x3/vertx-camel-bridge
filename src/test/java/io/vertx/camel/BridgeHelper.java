@@ -30,7 +30,7 @@ public class BridgeHelper {
 
   public static void startBlocking(CamelBridge bridge) {
     AtomicReference<Boolean> spy = new AtomicReference<>();
-    bridge.start(v -> {
+    bridge.start().onComplete(v -> {
       if (v.failed()) {
         v.cause().printStackTrace();
       }
@@ -41,7 +41,7 @@ public class BridgeHelper {
 
   public static void stopBlocking(CamelBridge bridge) {
     AtomicReference<Boolean> spy = new AtomicReference<>();
-    bridge.stop(v -> {
+    bridge.stop().onComplete(v -> {
       if (v.failed()) {
         v.cause().printStackTrace();
       }
