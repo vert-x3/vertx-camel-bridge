@@ -136,22 +136,14 @@ public class CamelBridgeImpl implements CamelBridge {
   @Override
   public Future<Void> start() {
     Future<Void> fut = vertx.<Void>executeBlocking(
-      future -> {
+      () -> {
         camelConsumers.stream().forEach(c -> {
-          try {
-            c.start();
-          } catch (Exception e) {
-            future.fail(e);
-          }
+          c.start();
         });
         camelProducers.stream().forEach(c -> {
-          try {
-            c.start();
-          } catch (Exception e) {
-            future.fail(e);
-          }
+          c.start();
         });
-        future.complete();
+        return null;
       });
     return fut;
   }
@@ -159,23 +151,15 @@ public class CamelBridgeImpl implements CamelBridge {
   @Override
   public Future<Void> stop() {
     Future<Void> fut = vertx.<Void>executeBlocking(
-      future -> {
+      () -> {
         camelConsumers.stream().forEach(c -> {
-          try {
-            c.stop();
-          } catch (Exception e) {
-            future.fail(e);
-          }
+          c.stop();
         });
         camelProducers.stream().forEach(c -> {
-          try {
-            c.stop();
-          } catch (Exception e) {
-            future.fail(e);
-          }
+          c.stop();
         });
         vertxConsumers.stream().forEach(MessageConsumer::unregister);
-        future.complete();
+        return null;
       });
     return fut;
   }

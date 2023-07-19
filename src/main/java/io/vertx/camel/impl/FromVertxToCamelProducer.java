@@ -69,14 +69,14 @@ public class FromVertxToCamelProducer implements Handler<io.vertx.core.eventbus.
 
     if (blocking) {
       if (pool == null) {
-        vertx.executeBlocking(future -> {
+        vertx.executeBlocking(() -> {
           producer.process(exchange, new CamelProducerCallback(exchange, vertxMessage));
-          future.complete();
+          return null;
         });
       } else {
-        pool.executeBlocking(future -> {
+        pool.executeBlocking(() -> {
           producer.process(exchange, new CamelProducerCallback(exchange, vertxMessage));
-          future.complete();
+          return null;
         });
       }
     } else {
