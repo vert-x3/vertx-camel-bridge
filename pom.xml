@@ -1,148 +1,285 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-  <parent>
-    <groupId>io.vertx</groupId>
-    <artifactId>vertx-ext-parent</artifactId>
-    <version>38</version>
-  </parent>
-
-  <artifactId>vertx-camel-bridge</artifactId>
-  <version>4.5.10-SNAPSHOT</version>
-
-  <properties>
-    <vertx.version>${project.version}</vertx.version>
-    <camel.version>3.14.6</camel.version> <!-- vertx is still Java 8!!! -->
-  </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
+      
+    <modelVersion>4.0.0</modelVersion>
+      
+    <parent>
+            
         <groupId>io.vertx</groupId>
-        <artifactId>vertx-dependencies</artifactId>
-        <version>${vertx.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+            
+        <artifactId>vertx-ext-parent</artifactId>
+            
+        <version>38</version>
+          
+    </parent>
+      
+    <artifactId>vertx-camel-bridge</artifactId>
+      
+    <version>4.5.10</version>
+      
+    <properties>
+            
+        <vertx.version>${project.version}</vertx.version>
+            
+        <camel.version>3.14.6</camel.version>
+         
+        <!-- vertx is still Java 8!!! -->
+          
+    </properties>
+      
+    <dependencyManagement>
+            
+        <dependencies>
+                  
+            <dependency>
+                        
+                <groupId>io.vertx</groupId>
+                        
+                <artifactId>vertx-dependencies</artifactId>
+                        
+                <version>${vertx.version}</version>
+                        
+                <type>pom</type>
+                        
+                <scope>import</scope>
+                      
+            </dependency>
+                
+        </dependencies>
+          
+    </dependencyManagement>
+      
+    <dependencies>
+            
+        <dependency>
+                  
+            <!-- specify the SLF4J version to match the one used by vert.x -->
+                  
+            <groupId>org.slf4j</groupId>
+                  
+            <artifactId>slf4j-api</artifactId>
+                  
+            <optional>true</optional>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.apache.camel</groupId>
+                  
+            <artifactId>camel-core</artifactId>
+                  
+            <version>${camel.version}</version>
+                  
+            <exclusions>
+                        
+                <!-- exclude the version use by camel -->
+                        
+                <exclusion>
+                              
+                    <groupId>org.slf4j</groupId>
+                              
+                    <artifactId>slf4j-api</artifactId>
+                            
+                </exclusion>
+                        
+                <!-- declared by caffeine, guava declares a different version -->
+                        
+                <exclusion>
+                              
+                    <groupId>org.checkerframework</groupId>
+                              
+                    <artifactId>checker-qual</artifactId>
+                            
+                </exclusion>
+                        
+                <!-- declared by caffeine, guava declares a different version -->
+                        
+                <exclusion>
+                              
+                    <groupId>com.google.errorprone</groupId>
+                              
+                    <artifactId>error_prone_annotations</artifactId>
+                            
+                </exclusion>
+                      
+            </exclusions>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-core</artifactId>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-codegen</artifactId>
+                  
+            <optional>true</optional>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-docgen</artifactId>
+                  
+            <optional>true</optional>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.fusesource.hawtbuf</groupId>
+                  
+            <artifactId>hawtbuf</artifactId>
+                  
+            <version>1.11</version>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.apache.camel</groupId>
+                  
+            <artifactId>camel-test</artifactId>
+                  
+            <version>${camel.version}</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.apache.camel</groupId>
+                  
+            <artifactId>camel-stream</artifactId>
+                  
+            <version>${camel.version}</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.apache.camel</groupId>
+                  
+            <artifactId>camel-stomp</artifactId>
+                  
+            <version>${camel.version}</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.apache.camel</groupId>
+                  
+            <artifactId>camel-http</artifactId>
+                  
+            <version>${camel.version}</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-stomp</artifactId>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>commons-io</groupId>
+                  
+            <artifactId>commons-io</artifactId>
+                  
+            <version>2.7</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-unit</artifactId>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.assertj</groupId>
+                  
+            <artifactId>assertj-core</artifactId>
+                  
+            <version>3.23.1</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.awaitility</groupId>
+                  
+            <artifactId>awaitility</artifactId>
+                  
+            <version>4.2.0</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.apache.logging.log4j</groupId>
+                  
+            <artifactId>log4j-api</artifactId>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.apache.logging.log4j</groupId>
+                  
+            <artifactId>log4j-core</artifactId>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.apache.logging.log4j</groupId>
+                  
+            <artifactId>log4j-slf4j-impl</artifactId>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+          
     </dependencies>
-  </dependencyManagement>
-  <dependencies>
-    <dependency>
-      <!-- specify the SLF4J version to match the one used by vert.x -->
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-core</artifactId>
-      <version>${camel.version}</version>
-      <exclusions>
-        <!-- exclude the version use by camel -->
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-        <!-- declared by caffeine, guava declares a different version -->
-        <exclusion>
-          <groupId>org.checkerframework</groupId>
-          <artifactId>checker-qual</artifactId>
-        </exclusion>
-        <!-- declared by caffeine, guava declares a different version -->
-        <exclusion>
-          <groupId>com.google.errorprone</groupId>
-          <artifactId>error_prone_annotations</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-codegen</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-docgen</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.fusesource.hawtbuf</groupId>
-      <artifactId>hawtbuf</artifactId>
-      <version>1.11</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-test</artifactId>
-      <version>${camel.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-stream</artifactId>
-      <version>${camel.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-stomp</artifactId>
-      <version>${camel.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.camel</groupId>
-      <artifactId>camel-http</artifactId>
-      <version>${camel.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-stomp</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.7</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-unit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>3.23.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.awaitility</groupId>
-      <artifactId>awaitility</artifactId>
-      <version>4.2.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-api</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+    
 </project>
