@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>vertx-camel-bridge</artifactId>
-  <version>5.0.3</version>
+  <version>5.0.4-SNAPSHOT</version>
 
   <name>Vert.x Camel Bridge</name>
 
