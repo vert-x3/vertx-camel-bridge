@@ -11,7 +11,7 @@
 
   <artifactId>vertx-camel-bridge</artifactId>
   <name>Vert.x Camel Bridge</name>
-  <version>4.5.22-SNAPSHOT</version>
+  <version>4.5.22</version>
 
   <scm>
     <connection>scm:git:git@github.com:vert-x3/vertx-camel-bridge.git</connection>
